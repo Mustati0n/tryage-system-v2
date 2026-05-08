@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   extractApiError,
   fetchPatients,
@@ -11,6 +12,7 @@ const PATIENT_KEY = "personel.selectedPatient";
 const PATIENT_TC_KEY = "personel.patients.tcKimlikNo";
 
 export function PersonelPatientsPage() {
+  const navigate = useNavigate();
   const [tcKimlikNo, setTcKimlikNo] = useState(() => sessionStorage.getItem(PATIENT_TC_KEY) || "");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(() => {
     try {
@@ -36,11 +38,21 @@ export function PersonelPatientsPage() {
   });
   const [updatePatientLoading, setUpdatePatientLoading] = useState(false);
   const [updatePatientMessage, setUpdatePatientMessage] = useState<string | null>(null);
+  const [listSearch, setListSearch] = useState("");
   const showSelectedCard = useMemo(() => {
     if (!selectedPatient) return false;
     if (!tcKimlikNo.trim()) return true;
     return tcKimlikNo.trim() === selectedPatient.tcKimlikNo;
   }, [selectedPatient, tcKimlikNo]);
+
+  const filteredPatients = useMemo(() => {
+    const q = listSearch.trim().toLocaleLowerCase("tr-TR");
+    if (!q) return registeredPatients;
+    return registeredPatients.filter((p) => {
+      const haystack = `${p.ad} ${p.soyad} ${p.tcKimlikNo} ${p.cinsiyet}`.toLocaleLowerCase("tr-TR");
+      return haystack.includes(q);
+    });
+  }, [registeredPatients, listSearch]);
 
   useEffect(() => {
     sessionStorage.setItem(PATIENT_TC_KEY, tcKimlikNo);
@@ -108,6 +120,16 @@ export function PersonelPatientsPage() {
     setUpdatePatientMessage(null);
   };
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") cancelEditPatient();
+    };
+    if (editingPatientId) {
+      window.addEventListener("keydown", onKeyDown);
+    }
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [editingPatientId]);
+
   const onUpdatePatient = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingPatientId) return;
@@ -142,6 +164,12 @@ export function PersonelPatientsPage() {
     } finally {
       setUpdatePatientLoading(false);
     }
+  };
+
+  const transferToTriage = (patient: Patient) => {
+    sessionStorage.setItem(PATIENT_KEY, JSON.stringify(patient));
+    sessionStorage.setItem("personel.triage.tcKimlikNo", patient.tcKimlikNo);
+    navigate("/personel/triage");
   };
 
   return (
@@ -182,7 +210,7 @@ export function PersonelPatientsPage() {
         {searchMessage ? <p className="admin-alert admin-alert-ok">{searchMessage}</p> : null}
 
         {showSelectedCard ? (
-          <article className="admin-user-card">
+          <article className="admin-user-card personel-patient-found-card">
             <strong>
               {selectedPatient?.ad} {selectedPatient?.soyad}
             </strong>
@@ -204,6 +232,12 @@ export function PersonelPatientsPage() {
         </header>
         <div className="personel-block-body personel-registered-patients">
           <div className="personel-registered-toolbar">
+            <input
+              className="personel-registered-search"
+              placeholder="Ad, soyad, TC veya cinsiyet ara..."
+              value={listSearch}
+              onChange={(e) => setListSearch(e.target.value)}
+            />
             <button type="button" className="personel-secondary-action" onClick={() => void loadRegisteredPatients()} disabled={patientsLoading}>
               {patientsLoading ? "Yenileniyor..." : "Listeyi Yenile"}
             </button>
@@ -215,74 +249,92 @@ export function PersonelPatientsPage() {
           {patientsLoading ? <p className="muted-note">Kayıtlı hastalar yükleniyor...</p> : null}
           {!patientsLoading && registeredPatients.length === 0 ? <p className="muted-note">Kayıtlı hasta bulunamadı.</p> : null}
 
-          {registeredPatients.map((patient) => (
+          {filteredPatients.map((patient) => (
             <article key={patient.hastaId} className="personel-registered-item">
-              {editingPatientId === patient.hastaId ? (
-                <form onSubmit={onUpdatePatient} className="admin-filter-grid">
-                  <label>
-                    Ad
-                    <input value={editPatientForm.ad} onChange={(e) => setEditPatientForm((p) => ({ ...p, ad: e.target.value }))} required />
-                  </label>
-                  <label>
-                    Soyad
-                    <input value={editPatientForm.soyad} onChange={(e) => setEditPatientForm((p) => ({ ...p, soyad: e.target.value }))} required />
-                  </label>
-                  <label>
-                    TC Kimlik No
-                    <input
-                      value={editPatientForm.tcKimlikNo}
-                      onChange={(e) => setEditPatientForm((p) => ({ ...p, tcKimlikNo: e.target.value.replace(/\D/g, "").slice(0, 11) }))}
-                      maxLength={11}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Dogum Tarihi
-                    <input
-                      type="date"
-                      value={editPatientForm.dogumTarihi}
-                      onChange={(e) => setEditPatientForm((p) => ({ ...p, dogumTarihi: e.target.value }))}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Cinsiyet
-                    <select
-                      value={editPatientForm.cinsiyet}
-                      onChange={(e) => setEditPatientForm((p) => ({ ...p, cinsiyet: e.target.value as "KADIN" | "ERKEK" | "DIGER" }))}>
-                      <option value="KADIN">KADIN</option>
-                      <option value="ERKEK">ERKEK</option>
-                      <option value="DIGER">DIGER</option>
-                    </select>
-                  </label>
-                  <div className="admin-filter-actions">
-                    <button type="submit" disabled={updatePatientLoading}>
-                      {updatePatientLoading ? "Kaydediliyor..." : "Değişikliği Kaydet"}
-                    </button>
-                    <button type="button" className="personel-secondary-action" onClick={cancelEditPatient} disabled={updatePatientLoading}>
-                      Vazgeç
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="personel-registered-summary">
-                  <div>
-                    <strong>
-                      {patient.ad} {patient.soyad}
-                    </strong>
-                    <p className="muted-note">
-                      TC: {patient.tcKimlikNo} · Yaş: {patient.yas ?? "-"} · Cinsiyet: {patient.cinsiyet}
-                    </p>
-                  </div>
+              <div className="personel-registered-summary">
+                <div>
+                  <strong>
+                    {patient.ad} {patient.soyad}
+                  </strong>
+                  <p className="muted-note">
+                    TC: {patient.tcKimlikNo} · Yaş: {patient.yas ?? "-"} · Cinsiyet: {patient.cinsiyet}
+                  </p>
+                </div>
+                <div className="personel-registered-actions">
+                  <button type="button" className="personel-secondary-action" onClick={() => transferToTriage(patient)}>
+                    Triyaja Aktar
+                  </button>
                   <button type="button" className="personel-secondary-action" onClick={() => startEditPatient(patient)}>
                     Düzenle
                   </button>
                 </div>
-              )}
+              </div>
             </article>
           ))}
+          {!patientsLoading && filteredPatients.length === 0 && registeredPatients.length > 0 ? (
+            <p className="muted-note">Aramanla eşleşen hasta bulunamadı.</p>
+          ) : null}
         </div>
       </section>
+
+      {editingPatientId ? (
+        <div className="personel-detail-modal-backdrop" onClick={cancelEditPatient}>
+          <article className="personel-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="personel-detail-top">
+              <h3>Hasta Bilgisi Düzenle</h3>
+              <button className="personel-modal-close" type="button" onClick={cancelEditPatient} aria-label="Kapat">
+                ×
+              </button>
+            </div>
+            <form onSubmit={onUpdatePatient} className="admin-filter-grid">
+              <label>
+                Ad
+                <input value={editPatientForm.ad} onChange={(e) => setEditPatientForm((p) => ({ ...p, ad: e.target.value }))} required />
+              </label>
+              <label>
+                Soyad
+                <input value={editPatientForm.soyad} onChange={(e) => setEditPatientForm((p) => ({ ...p, soyad: e.target.value }))} required />
+              </label>
+              <label>
+                TC Kimlik No
+                <input
+                  value={editPatientForm.tcKimlikNo}
+                  onChange={(e) => setEditPatientForm((p) => ({ ...p, tcKimlikNo: e.target.value.replace(/\D/g, "").slice(0, 11) }))}
+                  maxLength={11}
+                  required
+                />
+              </label>
+              <label>
+                Dogum Tarihi
+                <input
+                  type="date"
+                  value={editPatientForm.dogumTarihi}
+                  onChange={(e) => setEditPatientForm((p) => ({ ...p, dogumTarihi: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Cinsiyet
+                <select
+                  value={editPatientForm.cinsiyet}
+                  onChange={(e) => setEditPatientForm((p) => ({ ...p, cinsiyet: e.target.value as "KADIN" | "ERKEK" | "DIGER" }))}>
+                  <option value="KADIN">KADIN</option>
+                  <option value="ERKEK">ERKEK</option>
+                  <option value="DIGER">DIGER</option>
+                </select>
+              </label>
+              <div className="admin-filter-actions">
+                <button type="submit" disabled={updatePatientLoading}>
+                  {updatePatientLoading ? "Kaydediliyor..." : "Değişikliği Kaydet"}
+                </button>
+                <button type="button" className="personel-secondary-action" onClick={cancelEditPatient} disabled={updatePatientLoading}>
+                  Vazgeç
+                </button>
+              </div>
+            </form>
+          </article>
+        </div>
+      ) : null}
     </main>
   );
 }

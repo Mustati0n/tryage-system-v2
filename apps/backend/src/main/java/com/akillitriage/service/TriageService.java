@@ -141,6 +141,19 @@ public class TriageService {
     return toResponse(saved);
   }
 
+  public void deleteMine(Long id, String username) {
+    TriageRecordEntity record =
+        triageRecordRepository
+            .findByIdAndCreatedByKullaniciAdiIgnoreCase(id, username)
+            .orElseThrow(() -> new NotFoundException("Triyaj kaydi bulunamadi"));
+    triageRecordRepository.delete(record);
+    systemLogService.log(
+        "TRIAGE_DELETE",
+        username,
+        "PERSONEL",
+        "Triyaj kaydi silindi: kayitId=" + id + ", hastaId=" + record.getHasta().getId());
+  }
+
   private LocalDate parseDate(String value) {
     if (!StringUtils.hasText(value)) {
       return null;

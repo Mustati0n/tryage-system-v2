@@ -63,3 +63,11 @@ Bu dosya sadece modelleme katmani gelistirme adimlarini takip etmek icin tutulur
 - [x] `sigmoid`, `isotonic` ve `temperature_scaled_sigmoid` ayni akisla karsilastirildi
 - [x] Label/probability class-order metrik tutarliligi duzeltildi
 - [x] Extended sonuca gore secili artifact kalibrasyonu `isotonic` olarak guncellendi
+
+## Faz-12: Yeni Model Arastirma (LSTM / BERT / Transformer)
+- [x] Faz-1 protokol dondurma dokumani olusturuldu (`memory-bank/modeling/phase1-protocol-freeze.md`)
+- [x] Faz-2 LSTM ilk deneyi tamamlandi (`packages/modeling/artifacts/phase2/lstm_text/phase2-lstm-summary.md`)
+- [x] LSTM artifact fiziksel test icin `selected/lstm_text` altina alindi ve backend varsayilani LSTM'e cevrildi
+- [ ] Faz-3 BERT deneyi
+- [ ] Faz-4 Transformer deneyi (BERT disi)
+- [ ] Faz-5 Klinik odakli nihai secim ve artifact guncellemesi

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TriageRecordRepository extends JpaRepository<TriageRecordEntity, Long> {
   List<TriageRecordEntity> findAllByOrderByBasvuruZamaniDesc();
   List<TriageRecordEntity> findAllByCreatedByKullaniciAdiIgnoreCaseOrderByBasvuruZamaniDesc(String createdByKullaniciAdi);
+  java.util.Optional<TriageRecordEntity> findByIdAndCreatedByKullaniciAdiIgnoreCase(Long id, String createdByKullaniciAdi);
 
   long countByEtiket(String etiket);
 }

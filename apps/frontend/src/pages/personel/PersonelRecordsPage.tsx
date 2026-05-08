@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  deleteRecord,
   extractApiError,
   fetchPatientById,
   fetchMyRecords,
@@ -27,6 +28,7 @@ export function PersonelRecordsPage() {
     neden: "",
   });
   const [saving, setSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -145,6 +147,31 @@ export function PersonelRecordsPage() {
     setSelectedRecordId(null);
     setSelectedPatient(null);
     setDetailLoading(false);
+  };
+
+  const onDeleteRecord = async (kayitId: number) => {
+    const confirmed = window.confirm("Bu kaydi silmek istediginize emin misiniz?");
+    if (!confirmed) return;
+
+    setDeletingId(kayitId);
+    setMessage(null);
+    const previousRecords = records;
+    setRecords((prev) => prev.filter((item) => item.kayitId !== kayitId));
+    try {
+      await deleteRecord(kayitId);
+      setMessageKind("ok");
+      setMessage("Kayit silindi.");
+      if (selectedRecordId === kayitId) {
+        closeDetail();
+      }
+      await load();
+    } catch (err) {
+      setRecords(previousRecords);
+      setMessageKind("error");
+      setMessage(extractApiError(err, "Kayit silinemedi. Backend'i yeniden baslatip tekrar dene."));
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   useEffect(() => {
@@ -290,10 +317,13 @@ export function PersonelRecordsPage() {
               </div>
             ) : (
               <div className="admin-filter-actions" style={{ marginTop: 8 }}>
-                <button className="personel-secondary-action" onClick={() => void openDetail(r)}>
+                <button type="button" className="personel-secondary-action" onClick={() => void openDetail(r)}>
                   Detayı Gör
                 </button>
-                <button onClick={() => startEdit(r)}>Override Duzenle</button>
+                <button type="button" onClick={() => startEdit(r)}>Override Duzenle</button>
+                <button type="button" onClick={() => void onDeleteRecord(r.kayitId)} disabled={deletingId === r.kayitId}>
+                  {deletingId === r.kayitId ? "Siliniyor..." : "Kaydi Sil"}
+                </button>
               </div>
             )}
           </article>

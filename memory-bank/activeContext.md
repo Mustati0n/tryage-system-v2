@@ -232,6 +232,10 @@
   - Hasta olusturma paneli artik `TC 11 hane + secili hasta yok` kosulunda daima gorunur
   - Arama hatasi/servis hatasi durumunda akış kesilmeden olusturma ile devam edilebilir
 - App shellde admin/personel sayfalarinin ustundeki mor yatay bant kaldirildi (body::before temizlendi)
+- Model fiziksel test gecisi:
+  - `packages/modeling/artifacts/selected/lstm_text` artifact'i olusturuldu (phase2 ciktilarindan)
+  - backend varsayilan `app.model.artifact-dir` LSTM'e cevrildi
+  - `infra/model-smoke-check.sh` beklenen model kontrolu `EXPECTED_MODEL` env ile parametrik hale getirildi (default: `lstm_text-v1`)
 
 ## Kararlaştırılan Noktalar
 - Topoloji: tek repo
@@ -276,6 +280,16 @@
     3) Inference maliyeti/operasyon kolayligi
   - Secilen model mevcut moduler registry/provider yapisina takilacak
 
+## Model Arastirma - Son Durum
+- Faz-1 protokol dondurma tamamlandi:
+  - `memory-bank/modeling/phase1-protocol-freeze.md` olusturuldu
+  - split/seed/metric/klinik karar kurallari sabitlendi
+- Faz-2 LSTM ilk deneyi tamamlandi:
+  - model: `lstm_text` (registry'ye eklendi)
+  - cikti: `packages/modeling/artifacts/phase2/lstm_text/phase2-lstm-summary.md`
+  - sonuc: `KIRMIZI recall=0.6639`, mevcut `tfidf_svm` baseline (`0.8151`) altinda
+- Siradaki teknik adim: Faz-2 LSTM tuning alt adimlari veya Faz-3 BERT deneyi
+
 ## En Son UI Guncellemesi
 - Personel triage ekranina `Kayıtlı Hastalar` bolumu eklendi:
   - Konum guncellendi: triyaj icinden cikartilip sidebar'da ayri `Kayıtlı Hastalar` sayfasina tasindi (`/personel/patients`)
@@ -283,3 +297,16 @@
   - ayni sayfadan `PUT /api/patients/{id}` ile duzenleme
   - secili hasta duzenlenirse session'daki secili hasta bilgisi de anlik guncelleniyor
 - `Tahmini Kaydet` butonu sikayet formundan cikarilip tahmin/override kartinin icine tasindi.
+- `Kayıtlı Hastalar` sayfasi UX gelistirmeleri:
+  - canli hizli arama eklendi (ad/soyad/TC/cinsiyet)
+  - satir-ici duzenleme yerine modal duzenleme akisi eklendi (liste dagilmadan duzenleme)
+  - `Triyaja Aktar` kisa aksiyonu eklendi (secilen hasta session'a yazilip `/personel/triage` aciliyor)
+- Personel kayit yonetimi guclendirildi:
+  - `DELETE /api/triage/records/{id}` endpointi eklendi (sadece kaydi olusturan personel silebilir)
+  - `Kayıtlarım` ekranina `Kaydi Sil` + onay penceresi eklendi
+  - Triyaj kaydetme adiminda duplicate kayit korumasi eklendi
+  - Basarili kaydetme sonrasi kayit numarasiyla net geri bildirim mesaji eklendi
+- Personel triage kaydetme geri bildirimi popup/modal akisina tasindi (detay modal stiline uyumlu)
+- `Kayıtlarım` silme aksiyonu guclendirildi:
+  - Butonlar `type=\"button\"` ile form submit yan etkisinden ayrildi
+  - Optimistic UI silme + hata halinde geri alma davranisi eklendi

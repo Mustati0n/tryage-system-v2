@@ -2,6 +2,7 @@
 set -euo pipefail
 
 API_BASE="${API_BASE:-http://localhost:8080}"
+EXPECTED_MODEL="${EXPECTED_MODEL:-lstm_text-v1}"
 
 parse_json_field() {
   local field="$1"
@@ -70,7 +71,7 @@ SYSTEM_MODELS_RESPONSE="$(
 )"
 SELECTED_MODEL="$(printf '%s' "$SYSTEM_MODELS_RESPONSE" | parse_json_field "modelVersiyonu")"
 CONFIG_NOTE="$(printf '%s' "$SYSTEM_MODELS_RESPONSE" | parse_json_field "not")"
-echo "$SELECTED_MODEL" | grep -q 'tfidf_svm-v1'
+echo "$SELECTED_MODEL" | grep -q "$EXPECTED_MODEL"
 echo "$CONFIG_NOTE" | grep -q 'provider=python-cli'
 echo "[ok] selectedModel ve provider dogrulandi"
 

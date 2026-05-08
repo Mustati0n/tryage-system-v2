@@ -13,13 +13,14 @@ if str(SRC) not in sys.path:
 
 from triage_modeling.config import TrainConfig
 from triage_modeling.evaluation import quick_comment
+from triage_modeling.registry import available_models
 from triage_modeling.training import train_once
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train one triage model.")
     parser.add_argument("--data-path", required=True)
-    parser.add_argument("--model", required=True, choices=["tfidf_logreg", "tfidf_svm", "berturk_gbdt"])
+    parser.add_argument("--model", required=True, choices=available_models())
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--test-size", type=float, default=0.2)
     parser.add_argument("--random-state", type=int, default=42)

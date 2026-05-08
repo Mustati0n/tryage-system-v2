@@ -88,9 +88,10 @@ export function AppShell({ role, children }: AppShellProps) {
       case "patients":
         return (
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <circle cx="12" cy="7" r="3" />
-            <path d="M5 20a7 7 0 0 1 14 0" />
-            <path d="M19 8v4M17 10h4" />
+            <rect x="3" y="4" width="18" height="16" rx="2.5" />
+            <circle cx="8" cy="10" r="2.2" />
+            <path d="M5.8 15.2c.7-1.8 2.1-2.7 4.2-2.7 2 0 3.4.9 4.1 2.7" />
+            <path d="M14 9h4M14 12h4M14 15h3" />
           </svg>
         );
       case "triage":

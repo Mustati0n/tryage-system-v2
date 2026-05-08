@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   createPatient,
   extractApiError,
+  fetchMyRecords,
   predictTriage,
   saveTriageRecord,
   searchPatientByTc,
@@ -39,6 +40,8 @@ export function PersonelTriagePage() {
   const [sttLoading, setSttLoading] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [sttMessage, setSttMessage] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [showSaveModal, setShowSaveModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [autoTranscribe, setAutoTranscribe] = useState(() => sessionStorage.getItem(TRIAGE_AUTO_STT_KEY) !== "0");
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -213,6 +216,8 @@ export function PersonelTriagePage() {
   const onPredict = async (e: FormEvent) => {
     e.preventDefault();
     setTriageError(null);
+    setSaveMessage(null);
+    setShowSaveModal(false);
     setSavedRecord(null);
     if (!selectedPatient) {
       setTriageError("Once bir hasta secmelisin.");
@@ -241,6 +246,8 @@ export function PersonelTriagePage() {
 
   const onSave = async () => {
     setTriageError(null);
+    setSaveMessage(null);
+    setShowSaveModal(false);
     if (!selectedPatient || !predictResult) {
       setTriageError("Kaydetmeden once tahmin almalisin.");
       return;
@@ -252,6 +259,28 @@ export function PersonelTriagePage() {
     }
     setSaveLoading(true);
     try {
+      const myRecords = await fetchMyRecords();
+      const normalize = (value: string) =>
+        value
+          .toLocaleLowerCase("tr-TR")
+          .replace(/\s+/g, " ")
+          .trim();
+      const normalizedComplaint = normalize(triageForm.sikayetMetni || "");
+      const finalEtiketToSave = hasPreSaveOverride ? preSaveEtiket : predictResult.etiket;
+      const duplicateRecord = myRecords.find((record) => {
+        const finalEtiket = record.overrideEtiket || record.etiket;
+        return (
+          record.hastaId === selectedPatient.hastaId &&
+          normalize(record.transcript || "") === normalizedComplaint &&
+          finalEtiket === finalEtiketToSave &&
+          Math.abs((record.guven || 0) - (predictResult.guven || 0)) < 0.000001
+        );
+      });
+      if (duplicateRecord) {
+        setTriageError(`Bu kaydin aynisi zaten kaydedildi (Kayit #${duplicateRecord.kayitId}).`);
+        return;
+      }
+
       const data = await saveTriageRecord({
         hastaId: selectedPatient.hastaId,
         yas: Number(triageForm.yas),
@@ -265,6 +294,8 @@ export function PersonelTriagePage() {
       });
       setSavedRecord(data);
       setPreSaveNeden("");
+      setSaveMessage(`Kayit basariyla olusturuldu (Kayit #${data.kayitId}).`);
+      setShowSaveModal(true);
     } catch (err) {
       setTriageError(extractApiError(err, "Triyaj kaydi kaydedilemedi."));
     } finally {
@@ -590,6 +621,7 @@ export function PersonelTriagePage() {
 
             {triageError ? <p className="admin-alert admin-alert-error">{triageError}</p> : null}
             {sttMessage ? <p className="admin-alert admin-alert-ok">{sttMessage}</p> : null}
+            {saveMessage ? <p className="admin-alert admin-alert-ok">{saveMessage}</p> : null}
 
             <div className="admin-filter-actions personel-complaint-actions">
               <button type="submit" className="personel-main-action" disabled={!canPredict}>
@@ -640,6 +672,43 @@ export function PersonelTriagePage() {
             </p>
           </article>
         </section>
+      ) : null}
+
+      {showSaveModal && savedRecord ? (
+        <div className="personel-detail-modal-backdrop" onClick={() => setShowSaveModal(false)}>
+          <div className="personel-detail-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="personel-detail-top">
+              <div>
+                <h2>Kayit Basarili</h2>
+                <p className="muted-note">Triyaj kaydi sisteme eklendi</p>
+              </div>
+              <button
+                type="button"
+                className="personel-modal-close"
+                onClick={() => setShowSaveModal(false)}
+                aria-label="Kayit modalini kapat">
+                ×
+              </button>
+            </div>
+            <article className="admin-user-card">
+              <strong>Kayit #{savedRecord.kayitId}</strong>
+              <p className="muted-note">
+                Orijinal Etiket: <span className={triageBadgeClass(savedRecord.etiket)}>{savedRecord.etiket}</span>
+              </p>
+              {savedRecord.overrideEtiket ? (
+                <p className="muted-note">
+                  Final Etiket:{" "}
+                  <span className={triageBadgeClass(savedRecord.overrideEtiket)}>{savedRecord.overrideEtiket}</span>
+                </p>
+              ) : null}
+              <div className="admin-filter-actions">
+                <button type="button" onClick={() => setShowSaveModal(false)}>
+                  Tamam
+                </button>
+              </div>
+            </article>
+          </div>
+        </div>
       ) : null}
 
     </main>

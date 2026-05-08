@@ -167,14 +167,21 @@
 - [x] Admin/personel sayfalarindaki ust mor bant (global shell stripe) kaldirildi
 - [x] Personel triage altina `Kayıtlı Hastalar` bolumu eklendi (listele + duzenle)
 - [x] `Kayıtlı Hastalar` konumu triage icinden sidebar'da ayri personel sayfasina tasindi (`/personel/patients`)
+- [x] `Kayıtlı Hastalar` sayfasina hizli arama + modal duzenleme + `Triyaja Aktar` kisa aksiyonu eklendi
 - [x] `Tahmini Kaydet` aksiyonu tahmin karti icine tasindi (override + kaydetme ayni blokta)
+- [x] Yeni model arastirma Faz-1 protokol dondurma dokumani eklendi (`memory-bank/modeling/phase1-protocol-freeze.md`)
+- [x] Faz-2 LSTM ilk denemesi tamamlandi (`lstm_text`) ve raporlandi (`packages/modeling/artifacts/phase2/lstm_text/phase2-lstm-summary.md`)
+- [x] LSTM artifact'i `selected` altina alindi ve backend varsayilan modeli fiziksel test icin LSTM'e cevrildi
+- [x] Personel `Kayıtlarım` silme akisi eklendi (sil butonu + onay penceresi + backend ownership kontrollu delete endpoint)
+- [x] Personel triage kaydetmede duplicate-kayit korumasi eklendi (ayni kayit varsa kaydetme yerine uyar)
+- [x] Personel triage kaydetme sonrasi net basari geri bildirimi eklendi (kayit no ile)
 
 ## Bekleyen Kısımlar
 - STT canli stream fazi (MVP sonrasi iyilestirme)
 - Merkezi log izleme (ELK/Grafana Loki) entegrasyonu (opsiyonel)
 - Yeni model benchmark fazi (Transformer / BERT / LSTM)
-  - [ ] Faz-1: Deney protokolu dondurulacak (split/seed/metric)
-  - [ ] Faz-2: LSTM deneyi tamamlanacak
+  - [x] Faz-1: Deney protokolu donduruldu (split/seed/metric)
+  - [x] Faz-2: LSTM deneyi tamamlandi
   - [ ] Faz-3: BERT deneyi tamamlanacak
   - [ ] Faz-4: BERT disi Transformer deneyi tamamlanacak
   - [ ] Faz-5: Klinik odakli nihai model secimi ve artifact guncellemesi

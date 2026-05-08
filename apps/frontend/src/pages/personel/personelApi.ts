@@ -118,6 +118,10 @@ export async function updateRecordOverride(
   return data;
 }
 
+export async function deleteRecord(kayitId: number) {
+  await api.delete(`/api/triage/records/${kayitId}`);
+}
+
 export function extractApiError(err: unknown, fallback: string) {
   if (axios.isAxiosError(err)) {
     return (

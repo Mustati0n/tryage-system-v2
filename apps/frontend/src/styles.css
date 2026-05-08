@@ -1074,7 +1074,17 @@ body {
 
 .personel-registered-toolbar {
   display: flex;
+  gap: 10px;
+  align-items: center;
   justify-content: flex-end;
+}
+
+.personel-registered-search {
+  min-width: 280px;
+  border: 1px solid #c8d8f6;
+  border-radius: 10px;
+  background: #fff;
+  padding: 9px 10px;
 }
 
 .personel-registered-item {
@@ -1089,6 +1099,16 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.personel-registered-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.personel-patient-found-card {
+  margin-top: 12px;
 }
 
 .personel-record-row {

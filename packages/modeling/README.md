@@ -5,9 +5,11 @@ Bu paket backend/API koduna dokunmadan model secimi, egitimi, degerlendirmesi ve
 ## Hedef
 - Ortak preprocessing + ortak split mantigi
 - 3 modeli adil karsilastirma:
+ - 4 modeli adil karsilastirma:
   1. `tfidf_logreg`
   2. `tfidf_svm`
   3. `berturk_gbdt`
+  4. `lstm_text`
 - Config/registry ile kolay model degisimi
 
 ## Kurulum

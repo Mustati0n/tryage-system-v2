@@ -6,6 +6,7 @@ from sklearn.pipeline import Pipeline
 
 from .models import (
     build_berturk_gbdt_pipeline,
+    build_lstm_text_pipeline,
     build_tfidf_logreg_pipeline,
     build_tfidf_svm_pipeline,
 )
@@ -16,6 +17,7 @@ MODEL_REGISTRY: dict[str, ModelBuilder] = {
     "tfidf_logreg": build_tfidf_logreg_pipeline,
     "tfidf_svm": build_tfidf_svm_pipeline,
     "berturk_gbdt": build_berturk_gbdt_pipeline,
+    "lstm_text": build_lstm_text_pipeline,
 }
 
 
