@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   extractApiError,
+  fetchPatients,
   searchPatientByTc,
+  updatePatient,
   type Patient,
 } from "./personelApi";
 
@@ -21,6 +23,19 @@ export function PersonelPatientsPage() {
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [registeredPatients, setRegisteredPatients] = useState<Patient[]>([]);
+  const [patientsLoading, setPatientsLoading] = useState(false);
+  const [patientsError, setPatientsError] = useState<string | null>(null);
+  const [editingPatientId, setEditingPatientId] = useState<number | null>(null);
+  const [editPatientForm, setEditPatientForm] = useState({
+    ad: "",
+    soyad: "",
+    tcKimlikNo: "",
+    dogumTarihi: "",
+    cinsiyet: "KADIN" as "KADIN" | "ERKEK" | "DIGER",
+  });
+  const [updatePatientLoading, setUpdatePatientLoading] = useState(false);
+  const [updatePatientMessage, setUpdatePatientMessage] = useState<string | null>(null);
   const showSelectedCard = useMemo(() => {
     if (!selectedPatient) return false;
     if (!tcKimlikNo.trim()) return true;
@@ -30,6 +45,23 @@ export function PersonelPatientsPage() {
   useEffect(() => {
     sessionStorage.setItem(PATIENT_TC_KEY, tcKimlikNo);
   }, [tcKimlikNo]);
+
+  const loadRegisteredPatients = async () => {
+    setPatientsLoading(true);
+    setPatientsError(null);
+    try {
+      const list = await fetchPatients();
+      setRegisteredPatients(list);
+    } catch (err) {
+      setPatientsError(extractApiError(err, "Kayıtlı hastalar alınamadı."));
+    } finally {
+      setPatientsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadRegisteredPatients();
+  }, []);
 
   const searchPatient = async (e: FormEvent) => {
     e.preventDefault();
@@ -50,11 +82,65 @@ export function PersonelPatientsPage() {
       } else {
         setSelectedPatient(data[0]);
         sessionStorage.setItem(PATIENT_KEY, JSON.stringify(data[0]));
+        void loadRegisteredPatients();
       }
     } catch (err) {
       setError(extractApiError(err, "Hasta arama sirasinda hata olustu."));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const startEditPatient = (patient: Patient) => {
+    setEditingPatientId(patient.hastaId);
+    setUpdatePatientMessage(null);
+    setEditPatientForm({
+      ad: patient.ad,
+      soyad: patient.soyad,
+      tcKimlikNo: patient.tcKimlikNo,
+      dogumTarihi: patient.dogumTarihi,
+      cinsiyet: patient.cinsiyet,
+    });
+  };
+
+  const cancelEditPatient = () => {
+    setEditingPatientId(null);
+    setUpdatePatientMessage(null);
+  };
+
+  const onUpdatePatient = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingPatientId) return;
+    if (!/^[0-9]{11}$/.test(editPatientForm.tcKimlikNo)) {
+      setUpdatePatientMessage("TC kimlik no 11 haneli olmalı.");
+      return;
+    }
+    if (!editPatientForm.ad.trim() || !editPatientForm.soyad.trim() || !editPatientForm.dogumTarihi) {
+      setUpdatePatientMessage("Ad, soyad ve doğum tarihi zorunlu.");
+      return;
+    }
+
+    setUpdatePatientLoading(true);
+    setUpdatePatientMessage(null);
+    try {
+      const updated = await updatePatient(editingPatientId, {
+        ad: editPatientForm.ad.trim(),
+        soyad: editPatientForm.soyad.trim(),
+        tcKimlikNo: editPatientForm.tcKimlikNo,
+        dogumTarihi: editPatientForm.dogumTarihi,
+        cinsiyet: editPatientForm.cinsiyet,
+      });
+      setUpdatePatientMessage("Hasta bilgileri güncellendi.");
+      setRegisteredPatients((prev) => prev.map((p) => (p.hastaId === updated.hastaId ? updated : p)));
+      if (selectedPatient?.hastaId === updated.hastaId) {
+        setSelectedPatient(updated);
+        sessionStorage.setItem(PATIENT_KEY, JSON.stringify(updated));
+      }
+      setEditingPatientId(null);
+    } catch (err) {
+      setUpdatePatientMessage(extractApiError(err, "Hasta güncellenemedi."));
+    } finally {
+      setUpdatePatientLoading(false);
     }
   };
 
@@ -109,6 +195,93 @@ export function PersonelPatientsPage() {
         {selectedPatient && !showSelectedCard ? (
           <p className="muted-note">Yeni TC yazdin. Tekrar "Ara" ile yeni hasta secimi yapabilirsin.</p>
         ) : null}
+      </section>
+
+      <section className="personel-block">
+        <header className="personel-block-head personel-block-head-info">
+          <h3>Kayıtlı Hastalar</h3>
+          <p>Bu listeden hastaları görüntüle ve düzenle</p>
+        </header>
+        <div className="personel-block-body personel-registered-patients">
+          <div className="personel-registered-toolbar">
+            <button type="button" className="personel-secondary-action" onClick={() => void loadRegisteredPatients()} disabled={patientsLoading}>
+              {patientsLoading ? "Yenileniyor..." : "Listeyi Yenile"}
+            </button>
+          </div>
+
+          {patientsError ? <p className="admin-alert admin-alert-error">{patientsError}</p> : null}
+          {updatePatientMessage ? <p className="admin-alert admin-alert-ok">{updatePatientMessage}</p> : null}
+
+          {patientsLoading ? <p className="muted-note">Kayıtlı hastalar yükleniyor...</p> : null}
+          {!patientsLoading && registeredPatients.length === 0 ? <p className="muted-note">Kayıtlı hasta bulunamadı.</p> : null}
+
+          {registeredPatients.map((patient) => (
+            <article key={patient.hastaId} className="personel-registered-item">
+              {editingPatientId === patient.hastaId ? (
+                <form onSubmit={onUpdatePatient} className="admin-filter-grid">
+                  <label>
+                    Ad
+                    <input value={editPatientForm.ad} onChange={(e) => setEditPatientForm((p) => ({ ...p, ad: e.target.value }))} required />
+                  </label>
+                  <label>
+                    Soyad
+                    <input value={editPatientForm.soyad} onChange={(e) => setEditPatientForm((p) => ({ ...p, soyad: e.target.value }))} required />
+                  </label>
+                  <label>
+                    TC Kimlik No
+                    <input
+                      value={editPatientForm.tcKimlikNo}
+                      onChange={(e) => setEditPatientForm((p) => ({ ...p, tcKimlikNo: e.target.value.replace(/\D/g, "").slice(0, 11) }))}
+                      maxLength={11}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Dogum Tarihi
+                    <input
+                      type="date"
+                      value={editPatientForm.dogumTarihi}
+                      onChange={(e) => setEditPatientForm((p) => ({ ...p, dogumTarihi: e.target.value }))}
+                      required
+                    />
+                  </label>
+                  <label>
+                    Cinsiyet
+                    <select
+                      value={editPatientForm.cinsiyet}
+                      onChange={(e) => setEditPatientForm((p) => ({ ...p, cinsiyet: e.target.value as "KADIN" | "ERKEK" | "DIGER" }))}>
+                      <option value="KADIN">KADIN</option>
+                      <option value="ERKEK">ERKEK</option>
+                      <option value="DIGER">DIGER</option>
+                    </select>
+                  </label>
+                  <div className="admin-filter-actions">
+                    <button type="submit" disabled={updatePatientLoading}>
+                      {updatePatientLoading ? "Kaydediliyor..." : "Değişikliği Kaydet"}
+                    </button>
+                    <button type="button" className="personel-secondary-action" onClick={cancelEditPatient} disabled={updatePatientLoading}>
+                      Vazgeç
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="personel-registered-summary">
+                  <div>
+                    <strong>
+                      {patient.ad} {patient.soyad}
+                    </strong>
+                    <p className="muted-note">
+                      TC: {patient.tcKimlikNo} · Yaş: {patient.yas ?? "-"} · Cinsiyet: {patient.cinsiyet}
+                    </p>
+                  </div>
+                  <button type="button" className="personel-secondary-action" onClick={() => startEditPatient(patient)}>
+                    Düzenle
+                  </button>
+                </div>
+              )}
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );

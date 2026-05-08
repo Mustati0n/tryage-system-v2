@@ -41,6 +41,13 @@ export function AppShell({ role, children }: AppShellProps) {
     .join("") || "AT";
   const lastLoginAt = localStorage.getItem("lastLoginAt");
   const roleBadgeText = role === "ADMIN" ? "ADMIN" : "PERSONEL";
+  const hasPendingTriage = () => sessionStorage.getItem("personel.triage.pending") === "1";
+
+  const confirmLeaveFromTriage = () => {
+    if (!location.pathname.startsWith("/personel/triage")) return true;
+    if (!hasPendingTriage()) return true;
+    return window.confirm("Kaydedilmemis triyaj tahmini var. Bu sayfadan cikmak istedigine emin misin?");
+  };
 
   const iconFor = (label: string) => {
     const lower = label.toLowerCase();
@@ -117,12 +124,22 @@ export function AppShell({ role, children }: AppShellProps) {
       : [
           { to: "/personel/dashboard", label: "Personel Dashboard" },
           { to: "/personel/triage", label: "Triyaj" },
+          { to: "/personel/patients", label: "Kayitli Hastalar" },
           { to: "/personel/records", label: "Kayitlarim" },
         ];
+
+  const logoutWithConfirm = async () => {
+    const message = hasPendingTriage()
+      ? "Kaydedilmemis triyaj tahmini var. Cikarsan bu adim tamamlanmadan kalacak. Yine de cikmak istiyor musun?"
+      : "Sistemden cikmak istedigine emin misin?";
+    if (!window.confirm(message)) return;
+    await auth.logout();
+  };
 
   const title = useMemo(() => {
     if (role !== "ADMIN") {
       if (location.pathname.includes("/personel/triage")) return "Triyaj Kaydi Olustur";
+      if (location.pathname.includes("/personel/patients")) return "Kayitli Hastalar";
       if (location.pathname.includes("/personel/records")) return "Kendi Kayitlarim";
       return "Personel Dashboard";
     }
@@ -174,6 +191,11 @@ export function AppShell({ role, children }: AppShellProps) {
             <NavLink
               key={link.label}
               to={link.to}
+              onClick={(e) => {
+                if (!confirmLeaveFromTriage()) {
+                  e.preventDefault();
+                }
+              }}
               className={({ isActive }) => `app-nav-link ${isActive ? "active" : ""}`}>
               <span className={`app-nav-icon app-nav-icon-${iconFor(link.label)}`} aria-hidden="true">
                 {renderIcon(iconFor(link.label))}
@@ -196,7 +218,7 @@ export function AppShell({ role, children }: AppShellProps) {
             </div>
           </div>
         </div>
-        <button className="sidebar-logout" onClick={() => auth.logout()}>
+        <button className="sidebar-logout" onClick={() => void logoutWithConfirm()}>
           Cikis Yap
         </button>
       </aside>

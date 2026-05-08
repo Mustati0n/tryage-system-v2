@@ -219,6 +219,19 @@
   - `infra/setup-db-backup-systemd-user.sh`
   - `systemctl --user` ile gunluk 02:30 backup akisi aktiflenebilir
 - Runbook yedekleme adimlariyla guncellendi (`memory-bank/deployment/operations-runbook.md`)
+- Personel triage kritik UX hata duzeltmeleri eklendi:
+  - Hasta bulunamazsa ayni ekranda yeni hasta olusturma formu geri eklendi (ad/soyad/dogum tarihi/cinsiyet + TC ile olusturma)
+  - Tahmin alindiktan sonra kaydetmeden sayfa degisimi/sekme kapatma icin onay uyarisi eklendi
+  - Sidebar `Cikis Yap` aksiyonuna "emin misin" onayi eklendi (kaydedilmemis triage varsa daha guclu uyari metni)
+- Personel triage hasta arama akisi revize edildi:
+  - TC 11 haneye ulasinca otomatik arama tetikleniyor
+  - Eslesme yoksa hasta olusturma paneli otomatik aciliyor
+  - Eslesme varsa panel otomatik kapanip secili hasta karti gosteriliyor
+- Ek hata duzeltmesi: hasta arama hatasi durumunda da hasta olusturma paneli acik kalacak sekilde akıs guclendirildi (ariza aninda kullanici bloklanmiyor)
+- Hasta bilgileri paneli yeniden sadeleştirildi:
+  - Hasta olusturma paneli artik `TC 11 hane + secili hasta yok` kosulunda daima gorunur
+  - Arama hatasi/servis hatasi durumunda akış kesilmeden olusturma ile devam edilebilir
+- App shellde admin/personel sayfalarinin ustundeki mor yatay bant kaldirildi (body::before temizlendi)
 
 ## Kararlaştırılan Noktalar
 - Topoloji: tek repo
@@ -262,3 +275,11 @@
     2) Macro F1
     3) Inference maliyeti/operasyon kolayligi
   - Secilen model mevcut moduler registry/provider yapisina takilacak
+
+## En Son UI Guncellemesi
+- Personel triage ekranina `Kayıtlı Hastalar` bolumu eklendi:
+  - Konum guncellendi: triyaj icinden cikartilip sidebar'da ayri `Kayıtlı Hastalar` sayfasina tasindi (`/personel/patients`)
+  - `/api/patients` ile listeleme
+  - ayni sayfadan `PUT /api/patients/{id}` ile duzenleme
+  - secili hasta duzenlenirse session'daki secili hasta bilgisi de anlik guncelleniyor
+- `Tahmini Kaydet` butonu sikayet formundan cikarilip tahmin/override kartinin icine tasindi.

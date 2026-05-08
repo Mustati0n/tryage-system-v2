@@ -158,6 +158,16 @@
 - [x] DB backup/restore otomasyonu eklendi (`infra/db-backup.sh`, `infra/db-restore.sh`, `infra/setup-db-backup-cron.sh`)
 - [x] Operasyon runbook'una backup/restore/cron adimlari eklendi
 - [x] Crontab yetki kisitina alternatif `systemd --user` backup timer kurulumu eklendi (`infra/setup-db-backup-systemd-user.sh`)
+- [x] Personel triage ekraninda "hasta bulunamadiysa olustur" akisi geri eklendi
+- [x] Kaydedilmemis tahmin varken sayfa degisim/sekme kapatma uyarisi eklendi
+- [x] Logout aksiyonuna kullanici onay penceresi eklendi
+- [x] Personel triage: TC 11 hanede otomatik hasta sorgu + bulunamazsa otomatik hasta olusturma paneli akisi eklendi
+- [x] Personel triage: arama hatasi olsa bile hasta olusturma paneli acik kalacak sekilde bloklayici davranis giderildi
+- [x] Personel triage: hasta olusturma paneli `TC 11 hane + secili hasta yok` kuralina sabitlendi
+- [x] Admin/personel sayfalarindaki ust mor bant (global shell stripe) kaldirildi
+- [x] Personel triage altina `Kayıtlı Hastalar` bolumu eklendi (listele + duzenle)
+- [x] `Kayıtlı Hastalar` konumu triage icinden sidebar'da ayri personel sayfasina tasindi (`/personel/patients`)
+- [x] `Tahmini Kaydet` aksiyonu tahmin karti icine tasindi (override + kaydetme ayni blokta)
 
 ## Bekleyen Kısımlar
 - STT canli stream fazi (MVP sonrasi iyilestirme)

@@ -55,6 +55,25 @@ export async function fetchPatientById(hastaId: number) {
   return data;
 }
 
+export async function fetchPatients() {
+  const { data } = await api.get<Patient[]>("/api/patients");
+  return data;
+}
+
+export async function updatePatient(
+  hastaId: number,
+  payload: {
+    ad: string;
+    soyad: string;
+    tcKimlikNo: string;
+    dogumTarihi: string;
+    cinsiyet: "KADIN" | "ERKEK" | "DIGER";
+  },
+) {
+  const { data } = await api.put<Patient>(`/api/patients/${hastaId}`, payload);
+  return data;
+}
+
 export async function predictTriage(payload: {
   yas: number;
   cinsiyet: string;

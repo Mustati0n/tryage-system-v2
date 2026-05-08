@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import {
+  createPatient,
   extractApiError,
   predictTriage,
   saveTriageRecord,
@@ -15,6 +16,7 @@ const PATIENT_KEY = "personel.selectedPatient";
 const TRIAGE_TC_KEY = "personel.triage.tcKimlikNo";
 const TRIAGE_FORM_KEY = "personel.triage.form";
 const TRIAGE_AUTO_STT_KEY = "personel.triage.autoStt";
+const TRIAGE_PENDING_KEY = "personel.triage.pending";
 
 export function PersonelTriagePage() {
   const [tcKimlikNo, setTcKimlikNo] = useState(() => sessionStorage.getItem(TRIAGE_TC_KEY) || "");
@@ -27,8 +29,10 @@ export function PersonelTriagePage() {
     }
   });
   const [searchMessage, setSearchMessage] = useState<string | null>(null);
+  const [lastAutoSearchedTc, setLastAutoSearchedTc] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [patientError, setPatientError] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [triageError, setTriageError] = useState<string | null>(null);
   const [predictLoading, setPredictLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
@@ -49,11 +53,19 @@ export function PersonelTriagePage() {
   });
   const [predictResult, setPredictResult] = useState<PredictResponse | null>(null);
   const [savedRecord, setSavedRecord] = useState<TriageRecordResponse | null>(null);
+  const [creatingPatient, setCreatingPatient] = useState(false);
   const [preSaveEtiket, setPreSaveEtiket] = useState<"KIRMIZI" | "SARI" | "YESIL" | null>(null);
   const [preSaveNeden, setPreSaveNeden] = useState("");
+  const [createForm, setCreateForm] = useState({
+    ad: "",
+    soyad: "",
+    dogumTarihi: "",
+    cinsiyet: "KADIN",
+  });
 
   const canPredict = !!selectedPatient && !predictLoading;
   const canSave = !!predictResult && !!selectedPatient && !saveLoading;
+  const hasUnsavedPrediction = !!predictResult && !savedRecord;
 
   useEffect(() => {
     try {
@@ -83,6 +95,20 @@ export function PersonelTriagePage() {
   }, [autoTranscribe]);
 
   useEffect(() => {
+    sessionStorage.setItem(TRIAGE_PENDING_KEY, hasUnsavedPrediction ? "1" : "0");
+  }, [hasUnsavedPrediction]);
+
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasUnsavedPrediction) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, [hasUnsavedPrediction]);
+
+  useEffect(() => {
     return () => {
       if (audioPreviewUrl) URL.revokeObjectURL(audioPreviewUrl);
       if (mediaStreamRef.current) {
@@ -91,9 +117,15 @@ export function PersonelTriagePage() {
     };
   }, [audioPreviewUrl]);
 
+
   const searchPatient = async (e: FormEvent) => {
     e.preventDefault();
+    await runPatientLookup();
+  };
+
+  const runPatientLookup = async () => {
     setPatientError(null);
+    setCreateError(null);
     setSearchMessage(null);
     setSelectedPatient(null);
     setPredictResult(null);
@@ -110,7 +142,7 @@ export function PersonelTriagePage() {
     try {
       const data = await searchPatientByTc(tcKimlikNo);
       if (data.length === 0) {
-        setSearchMessage("Hasta bulunamadi. Lutfen dogru TC ile tekrar ara.");
+        setSearchMessage("Hasta bulunamadi. Asagidaki formdan yeni hasta olusturabilirsin.");
       } else {
         setSelectedPatient(data[0]);
         sessionStorage.setItem(PATIENT_KEY, JSON.stringify(data[0]));
@@ -124,6 +156,57 @@ export function PersonelTriagePage() {
       setPatientError(extractApiError(err, "Hasta arama sirasinda hata olustu."));
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!/^[0-9]{11}$/.test(tcKimlikNo)) {
+      setLastAutoSearchedTc("");
+      return;
+    }
+    if (tcKimlikNo === lastAutoSearchedTc) return;
+    setLastAutoSearchedTc(tcKimlikNo);
+    void runPatientLookup();
+  }, [tcKimlikNo, lastAutoSearchedTc]);
+
+  const onCreatePatient = async (e: FormEvent) => {
+    e.preventDefault();
+    setCreateError(null);
+    setPatientError(null);
+    setSearchMessage(null);
+
+    if (!/^[0-9]{11}$/.test(tcKimlikNo)) {
+      setCreateError("Yeni kayit icin gecerli 11 haneli TC zorunlu.");
+      return;
+    }
+
+    if (!createForm.ad.trim() || !createForm.soyad.trim() || !createForm.dogumTarihi) {
+      setCreateError("Ad, soyad ve dogum tarihi zorunlu.");
+      return;
+    }
+
+    setCreatingPatient(true);
+    try {
+      const created = await createPatient({
+        ad: createForm.ad.trim(),
+        soyad: createForm.soyad.trim(),
+        tcKimlikNo,
+        dogumTarihi: createForm.dogumTarihi,
+        cinsiyet: createForm.cinsiyet,
+      });
+
+      setSelectedPatient(created);
+      sessionStorage.setItem(PATIENT_KEY, JSON.stringify(created));
+      setTriageForm((p) => ({
+        ...p,
+        yas: created.yas != null ? String(created.yas) : p.yas,
+        cinsiyet: created.cinsiyet || p.cinsiyet,
+      }));
+      setSearchMessage("Hasta basariyla olusturuldu ve secildi.");
+    } catch (err) {
+      setCreateError(extractApiError(err, "Hasta kaydi yapilamadi."));
+    } finally {
+      setCreatingPatient(false);
     }
   };
 
@@ -271,6 +354,8 @@ export function PersonelTriagePage() {
     sessionStorage.removeItem(PATIENT_KEY);
   };
 
+  const shouldShowCreatePanel = !selectedPatient && /^[0-9]{11}$/.test(tcKimlikNo);
+
   return (
     <main className="triage-page admin-pro personel-pro">
       <section className="personel-hero">
@@ -332,6 +417,7 @@ export function PersonelTriagePage() {
             </div>
           </form>
           {patientError ? <p className="admin-alert admin-alert-error">{patientError}</p> : null}
+          {createError ? <p className="admin-alert admin-alert-error">{createError}</p> : null}
           {searchMessage ? <p className="admin-alert admin-alert-ok">{searchMessage}</p> : null}
 
           {selectedPatient ? (
@@ -357,6 +443,53 @@ export function PersonelTriagePage() {
                 </div>
               </div>
             </article>
+          ) : null}
+
+          {shouldShowCreatePanel ? (
+            <form onSubmit={onCreatePatient} className="admin-filter-grid" style={{ marginTop: 10 }}>
+              <label>
+                Ad
+                <input
+                  placeholder="Hasta adi"
+                  value={createForm.ad}
+                  onChange={(e) => setCreateForm((p) => ({ ...p, ad: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Soyad
+                <input
+                  placeholder="Hasta soyadi"
+                  value={createForm.soyad}
+                  onChange={(e) => setCreateForm((p) => ({ ...p, soyad: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Dogum Tarihi
+                <input
+                  type="date"
+                  value={createForm.dogumTarihi}
+                  onChange={(e) => setCreateForm((p) => ({ ...p, dogumTarihi: e.target.value }))}
+                  required
+                />
+              </label>
+              <label>
+                Cinsiyet
+                <select
+                  value={createForm.cinsiyet}
+                  onChange={(e) => setCreateForm((p) => ({ ...p, cinsiyet: e.target.value }))}>
+                  <option value="KADIN">KADIN</option>
+                  <option value="ERKEK">ERKEK</option>
+                  <option value="DIGER">DIGER</option>
+                </select>
+              </label>
+              <div className="admin-filter-actions">
+                <button type="submit" disabled={creatingPatient}>
+                  {creatingPatient ? "Kaydediliyor..." : "Hasta Olustur"}
+                </button>
+              </div>
+            </form>
           ) : null}
         </div>
       </section>
@@ -462,9 +595,6 @@ export function PersonelTriagePage() {
               <button type="submit" className="personel-main-action" disabled={!canPredict}>
                 {predictLoading ? "Tahmin aliniyor..." : "Tahmin Al"}
               </button>
-              <button type="button" className="personel-secondary-action" onClick={onSave} disabled={!canSave}>
-                {saveLoading ? "Kaydediliyor..." : "Tahmini Kaydet"}
-              </button>
             </div>
           </form>
         </div>
@@ -472,7 +602,7 @@ export function PersonelTriagePage() {
 
       {predictResult ? (
         <section className="admin-panel-card">
-          <article className="admin-user-card">
+          <article className="admin-user-card personel-prediction-card">
             <strong>
               Tahmin: <span className={triageBadgeClass(predictResult.etiket)}>{predictResult.etiket}</span>
             </strong>
@@ -491,6 +621,11 @@ export function PersonelTriagePage() {
                 <textarea value={preSaveNeden} onChange={(e) => setPreSaveNeden(e.target.value)} placeholder="Etiketi degistirdiysen zorunlu" />
               </label>
             </div>
+            <div className="personel-prediction-actions">
+              <button type="button" className="personel-main-action" onClick={onSave} disabled={!canSave}>
+                {saveLoading ? "Kaydediliyor..." : "Tahmini Kaydet"}
+              </button>
+            </div>
           </article>
         </section>
       ) : null}
@@ -506,6 +641,7 @@ export function PersonelTriagePage() {
           </article>
         </section>
       ) : null}
+
     </main>
   );
 }

@@ -28,17 +28,6 @@ body {
   min-height: 100vh;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 28px;
-  background: linear-gradient(90deg, #7f1d4f, #7e2a8a);
-  z-index: 0;
-}
-
 .app-shell {
   min-height: 100dvh;
   display: grid;
@@ -47,8 +36,8 @@ body::before {
 
 .app-sidebar {
   position: sticky;
-  top: 28px;
-  height: calc(100dvh - 28px);
+  top: 0;
+  height: 100dvh;
   padding: 0;
   border-right: 1px solid var(--line);
   background: #ffffff;
@@ -168,7 +157,7 @@ body::before {
 
 .app-content {
   padding: 18px 18px 30px;
-  margin-top: 28px;
+  margin-top: 0;
   width: 100%;
   min-width: 0;
 }
@@ -1061,6 +1050,45 @@ body::before {
 
 .personel-complaint-actions {
   margin-top: 2px;
+}
+
+.personel-prediction-card {
+  display: grid;
+  gap: 10px;
+}
+
+.personel-prediction-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.personel-prediction-actions .personel-main-action {
+  width: auto;
+  min-width: 220px;
+}
+
+.personel-registered-patients {
+  display: grid;
+  gap: 10px;
+}
+
+.personel-registered-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.personel-registered-item {
+  border: 1px solid #dbe6f8;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f9fbff, #f4f8ff);
+  padding: 12px;
+}
+
+.personel-registered-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .personel-record-row {

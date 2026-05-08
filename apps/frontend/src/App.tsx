@@ -7,6 +7,7 @@ import { AdminRecordsPage } from "./pages/admin/AdminRecordsPage";
 import { AdminPersonnelPage } from "./pages/admin/AdminPersonnelPage";
 import { AdminLogsPage } from "./pages/admin/AdminLogsPage";
 import { PersonelDashboardPage } from "./pages/personel/PersonelDashboardPage";
+import { PersonelPatientsPage } from "./pages/personel/PersonelPatientsPage";
 import { PersonelTriagePage } from "./pages/personel/PersonelTriagePage";
 import { PersonelRecordsPage } from "./pages/personel/PersonelRecordsPage";
 
@@ -39,6 +40,7 @@ export function App() {
               <Routes>
                 <Route path="" element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<PersonelDashboardPage />} />
+                <Route path="patients" element={<PersonelPatientsPage />} />
                 <Route path="triage" element={<PersonelTriagePage />} />
                 <Route path="records" element={<PersonelRecordsPage />} />
                 <Route path="*" element={<Navigate to="dashboard" replace />} />
