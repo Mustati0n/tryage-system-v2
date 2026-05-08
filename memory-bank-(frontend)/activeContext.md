@@ -1,0 +1,232 @@
+# Active Context (frontend)
+
+## Güncel Durum
+- Ekran kapsamı ve akışlar net
+- API kontratı hazır (referans: `memory-bank/contracts/api-contract.md`)
+- React frontend iskeleti oluşturuldu
+- Login ekranı + role bazlı route guard eklendi
+- Personel panelinde hasta arama/olusturma API entegrasyonu eklendi
+- Personel panelinde triage tahmin + kaydet API entegrasyonu eklendi
+- Admin panelinde kayit listeleme + dataset ekleme + export API entegrasyonu eklendi
+- `npm run build` başarılı
+- Backend `/api/auth/refresh` endpointi frontend tarafına entegre edildi
+- Axios response interceptor ile refresh token akışı eklendi (401 -> `/api/auth/refresh` -> retry)
+- Refresh entegrasyonu sonrası frontend build tekrar doğrulandı (`npm run build`)
+- Personel paneline ses dosyası upload + `/api/triage/stt` çağrısı eklendi
+- STT dönüşü transcript alanına otomatik yazılıyor, kullanıcı metni düzenleyebiliyor
+- Personel panelinde mikrofon ile tarayıcı içi ses kaydı eklendi (Kaydı Başlat/Durdur)
+- Hata mesajları bölgesel hale getirildi (Hasta hatası ve Triyaj/STT hatası ayrı gösteriliyor)
+- Personel paneline "Kendi Kayıtlarım" listesi eklendi (`/api/triage/records/me`)
+- Kayıt bazlı override düzenleme formu eklendi (PATCH `/api/triage/records/{id}`)
+- Override akışı tahmin kartına taşındı: kullanıcı kaydetmeden önce etiketi değiştirebiliyor
+- Kaydedildi kartı ve kayıt listesinde orijinal model etiketi + override etiketi birlikte gösteriliyor
+- Tekil override kararı alındı: kaydedildikten sonra ayrı override formu kaldırıldı
+- Admin panelinde filtre seti genişletildi: etiket + confidence min/max + override var/yok + tarih aralığı
+- Admin paneli filtreleri backend query param ile çalışacak şekilde güncellendi (server-side filtering)
+- UI durumları güçlendirildi: Personel triyaj ön koşul mesajı, "Kendi Kayıtlarım" loading metni, Admin tabloda loading satırı, seçimsiz dataset ekleme aksiyonu engelleme
+- Admin dataset UX iyileştirildi: `GET /api/dataset/items` ile secili kaydin dataset'te olup olmadigi gosteriliyor, tekrar ekleme buton seviyesinde engelleniyor, "zaten dataset'te" mesaji ayri durum olarak veriliyor
+- Personel panelindeki iki kolonlu formlar responsive `auto-fit/minmax` yapisina alinip mobilde daha okunur hale getirildi
+- Playwright E2E kuruldu (`playwright.config.ts`, `e2e/auth-and-flow.spec.ts`) ve iki tarayici testi calisti
+  - Personel login -> personel paneli
+  - Admin login -> dataset'e ekle -> tekrar ekleme engeli
+- Gercek backend bagli E2E testleri eklendi (`playwright.real.config.ts`, `e2e-real/real-backend-flow.spec.ts`)
+  - Personel: login -> hasta olustur -> tahmin -> kaydet
+  - Admin: login -> dataset'e ekle (kayit API ile olusturulup UI'dan ekleniyor)
+- Negatif E2E senaryolari eklendi
+  - Mock: yanlis login, kayit secmeden dataset'e ekleme engeli
+  - Real: yanlis sifre ile login hata mesaji
+- Responsive iyilestirmeler genisletildi
+  - Login sayfasina yatay padding
+  - Admin panel header/filter/dataset form alanlari mobilde daha duzenli grid yapiya cekildi
+- Admin paneline "Kullanici Yonetimi" bolumu eklendi
+  - `GET /api/users` ile kullanici listesi
+  - `POST /api/users` ile yeni kullanici (personel/admin) olusturma
+  - `PATCH /api/users/{id}/status` ile aktif/pasif gecisi
+  - Kullanicilar icin success/error geri bildirim mesaji eklendi
+- Kullanici yonetimi eklendikten sonra frontend build tekrar basariyla dogrulandi
+- Playwright real-backend E2E'ye kullanici yonetimi senaryosu eklendi
+  - Admin login -> kullanici ekle -> pasif yap -> tekrar aktif yap
+  - Test listesinde yeni senaryo gorunuyor (`npx playwright test --config playwright.real.config.ts --list`)
+- Real-backend testte model etiketine bagimli kirilgan assertion duzeltildi
+  - `Tahmin: SARI` beklentisi yerine `Tahmin: (KIRMIZI|SARI|YESIL)` regex'i kullanildi
+- Playwright sonuc dogrulamasi:
+  - `npm run e2e` -> 4/4 passed
+  - `npm run e2e:real` -> 4/4 passed
+- Admin paneli use-case diyagramina daha yakin hale getirildi:
+  - `Deneme / Simulasyon Triyaj` bolumu eklendi (`/api/triage/predict`)
+  - `Sistem Loglari / Durum Ozeti` bolumu eklendi (`/api/system/stats`, `/api/system/models`, son kayit ozeti)
+  - "Yenile" butonu records/dataset/users/system kaynaklarini tek seferde guncelliyor
+- Bu degisikliklerden sonra frontend build tekrar basariyla dogrulandi (`npm run build`)
+- `a_tt.zip` frontend paketi analiz edilip mevcut uygulamaya tasarim adaptasyonu uygulandi
+- Birebir kod kopyasi yerine (router/stack farki nedeniyle) calisan API akislarini koruyup global stil katmani eklendi
+- `styles.css` ile login/personel/admin ekranlarina ortak modern tasarim dili verildi
+- Tasarim adaptasyonu sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Dashboard deneyimi icin role bazli shell eklendi (`components/AppShell.tsx`)
+- Login disindaki tum korumali rotalar shell layout altina alindi (`App.tsx`)
+- Personel/Admin icindeki tekrarli cikis header'i kaldirildi; sidebar baglantilari icin bolum id'leri eklendi
+- Shell entegrasyonu sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Triyaj etiket gorunumleri icin global badge sistemi eklendi (`styles.css`)
+- Personel sayfasinda tahmin/kayit kayitlari etiketleri badge olarak gosteriliyor
+- Admin sayfasinda simulasyon/log/tablo etiketleri badge olarak gosteriliyor
+- Badge guncellemesi sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Admin UI, referans screenshotlara daha yakin bir dashboard yapisina yeniden tasarlandi (yalniz admin)
+- Admin tarafinda modern panel bloklari eklendi:
+  - KPI kartlari, hizli erisim satiri, dagilim donut, haftalik trend
+  - model izleme alani, aktif personel mini listesi
+  - kayit/dataset/personel/log/simulasyon bolumleri yeni dilde korunarak yerlestirildi
+- `styles.css` icinde admin odakli yeni siniflar (`admin-pro`, `admin-stats-grid`, `admin-panel-card`, vb.) eklendi
+- Bu tasarim turu sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Yeni UX karariyla admin tek sayfa yerine sidebar yonetimli coklu sayfa mimarisine tasindi
+- Admin route'lari ayristirildi:
+  - `AdminDashboardPage` (`/admin/dashboard`)
+  - `AdminRecordsPage` (`/admin/records`)
+  - `AdminPersonnelPage` (`/admin/personnel`)
+  - `AdminLogsPage` (`/admin/logs`)
+- Ortak admin servis/API dosyasi eklendi (`pages/admin/adminApi.ts`) ve backend entegrasyonu bu katmanda toplandi
+- `AppShell` sidebar linkleri hash yerine gercek sayfa route'larina gecirildi
+- Coklu admin route donusumu sonrasi frontend build tekrar basarili (`npm run build`)
+- Kullanilmayan eski admin monolit dosyasi temizlendi (`src/pages/AdminPage.tsx` silindi)
+- Cleanup sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Sidebar gorsel/etkilesim katmani referanslara yaklastirildi:
+  - menu ikonlari
+  - aktif link glow + hover transition
+  - alt bolumde kullanici karti
+  - sidebar uzerinden cikis aksiyonu
+- Topbar'daki tekrarli cikis butonu kaldirildi
+- Bu sidebar UX iyilestirmesi sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Personel tarafi da admin yaklasimina cekildi: sidebar kontrollu coklu route
+  - `/personel/dashboard`
+  - `/personel/patients`
+  - `/personel/triage`
+  - `/personel/records`
+- Yeni `PersonelRecordsPage` eklendi (kendi kayitlari listeleme + arama + override duzenleme)
+- `personelApi.ts` genisletildi (`updateRecordOverride`)
+- `AppShell` personel linkleri hash yerine route bazli yapiya tasindi
+- Personel coklu sayfa gecisi sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Personel UI ikinci tur modernizasyonu yapildi (admin referans diline daha yakin):
+  - Personel dashboard/patients/triage/records sayfalarina hero + quick-link satiri eklendi
+  - Personel KPI kartlari eklendi (kayit sayisi, override, guven, secili hasta/ses durumu vb.)
+  - Kayitlar ekraninda kartlar yeniden duzenlendi (`personel-record-row`, meta badge gorunumu)
+  - Triyaj ekraninda ses aksiyonlari daha belirgin grid yapiya alindi
+- `styles.css` icine personel-odakli yeni siniflar eklendi (`personel-hero`, `personel-kpi-grid`, `personel-audio-row`, `personel-record-row`)
+- Bu modernizasyon sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Masaustu layout full-width davranisina alindi:
+  - `triage-page` ve `app-topbar` max-width kisitlari kaldirildi
+  - Icerik ortada dar kolon yerine tum alanı kullanacak sekilde guncellendi
+- Global tema referans ekranlara daha yakin sade dashboard diline cekildi (daha yumusak bg, border/shadow dengesi)
+- Full-width + tema duzenlemesi sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Sidebar referans screenshot'a daha da yaklastirildi:
+  - ustte logo + baslik + sagda kapatma (`x`) gorunumu eklendi
+  - nav aktif durumunda ikon rengi kaybolmadan beyaza donuyor
+  - sidebar spacing/border/zemin dili sade dashboard gorunumune cekildi
+- Personel sayfalarindaki "hizli secim" link satirlari kaldirildi
+- Personel triyaj ekrani referans kart yapisina yaklastirildi:
+  - `Hasta Bilgileri` ve `Sikayet Bilgileri` baslik bantlari
+  - ses kaydi icin dashed alan + belirgin aksiyon butonlari
+  - kaydetme/tahmin adimlari daha net hiyerarsiye alindi
+- Bu tur guncellemeler sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Sidebar ikon sistemi guncellendi (SVG tabanli):
+  - `Hasta Islemleri` ve `Triyaj` ikonlari daha mantikli/domain-uyumlu hale getirildi
+  - aktif durumda ikonlar kaybolmadan renk degistiriyor
+- `Kayıtlarım` sayfasina detay gorunumu eklendi:
+  - Hasta Bilgileri, Şikayet Bilgileri, Yapay Zeka Tahmini bolumleri
+  - "Guven Skoru" yalniz detay panelinde gosteriliyor
+  - liste satirinda `Confidence` metni kaldirildi, terimler Turkcelestirildi
+  - kayit bazinda `Detayı Gör` aksiyonu eklendi
+- Bu guncellemeler sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- `Kayıt Detayı` bir adim daha profesyonellestirildi:
+  - seviye metinleri Turkcelestirildi (`Acil / Orta / Dusuk`)
+  - detay icine ayri `Final Karar` karti eklendi (karar seviyesi, personel, zaman, override durumu)
+  - AI tahmini ve final karar hiyerarsisi guclendirildi
+- Son guncelleme sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- `Detayı Gör` akisi inline yerine modal panele tasindi:
+  - ortada acilan dikey panel (`overlay + centered modal`)
+  - dis alana tiklayinca kapanma davranisi eklendi
+- Sidebar `Cikis Yap` butonu sayfa temasina uygun sekilde yeniden stillendi
+- Bu guncelleme sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Detay modal UX guclendirildi:
+  - `Esc` tusu ile kapatma eklendi
+  - sag ustte `X` kapatma butonu eklendi
+- Admin dashboard ana sayfadaki yatay hizli kisayol satiri kaldirildi
+- Personel kayit karti listesinde model bilgisi kaldirildi (model sadece detay panelinde)
+- Bu guncelleme sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- `Kayıt Detayı` modal kapatma butonu (`X`) yeniden hizalandi ve daha merkezi gorunume alindi
+- Personel `Kendi Kayitlarim` ekraninda arama bolumu zenginlestirildi:
+  - metin aramasi Turkce karakter normalize edilerek daha toleransli calisiyor (`sari/sarı` benzeri)
+  - hizli etiket chip filtreleri eklendi (`Tum Etiketler`, `KIRMIZI`, `SARI`, `YESIL`)
+- Personel triage ekranindaki `Sikayet Bilgileri` blogu tamamen yeniden tasarlandi:
+  - metin alanlari + ses girisi iki katmanli daha net akisa alindi
+  - ses paneli (dosya/mikrofon/STT/otomatik ceviri) tek kartta daha okunur hale getirildi
+  - kayit durumuna gore ses kutusu gorsel durumlari eklendi (kayit suruyor / ses hazir)
+- Bu tur tasarim + UX guncellemeleri sonrasi frontend build tekrar basariyla dogrulandi (`npm run build`)
+- Arama kutusunda beyaz ekran bug'i giderildi (`PersonelRecordsPage` filtre callback'i icindeki fonksiyon sirasi duzeltildi)
+- Personel `Hasta Islemleri` ekraninda yeni-hasta olusturma paneli kaldirildi (yalin arama + secili hasta akisi)
+- Secili hasta kartinin "takili kalma" hissi azaltildi:
+  - TC degistirildiginde kart kosullu gosterim davranisina alindi
+  - kullaniciya "tekrar Ara" yonlendirme notu eklendi
+- Sayfalar arasi draft koruma guclendirildi:
+  - `triage` ekraninda TC, yas/cinsiyet/sikayet metni ve auto-STT tercihi sessionStorage'da saklaniyor
+  - `patients` ekraninda TC arama alani sessionStorage'da saklaniyor
+- Auto-STT checkbox hizasi/gorunumu iyilestirildi (tik ve metin ayni hizada)
+- Personel dashboard KPI kartlari 4'lu yatay duzene alindi ve daha profesyonel icon/renk diline cekildi
+- Bu tur bugfix + UX guncellemeleri sonrasi frontend build tekrar basariyla dogrulandi (`npm run build --workspace=apps/frontend`)
+- Login ekrani bastan profesyonel tasarim diline alindi:
+  - iki kolonlu brand + form yerlesimi
+  - gradient/cam etkili kart
+  - atmosferik arkaplan katmanlari
+  - yumusak acilis animasyonlari (floating shapes, card rise, fade-in)
+- Personel tarafinda `Hasta Islemleri` sayfasi menuden ve route yapisindan kaldirildi (sade navigasyon)
+- Bu tur login redesign + menu sadeleştirme sonrasi frontend build tekrar basariyla dogrulandi (`npm run build --workspace=apps/frontend`)
+- Login etkileşimleri ikinci turda guclendirildi:
+  - kullanici adina gore canli rol ipucu metni
+  - input hover/focus mikro animasyonlari
+  - butonda shimmmer/ripple benzeri gecis
+- Personel sayfalarina ortak profesyonel motion katmani eklendi (`personel-pro`):
+  - bolum bazli staged rise animasyonu
+  - kart/bolum hover derinlik etkisi
+  - hero bolumune yumusak atmosferik highlight
+- Bu tur motion + polish guncellemeleri sonrasi frontend build tekrar basariyla dogrulandi (`npm run build --workspace=apps/frontend`)
+- Personel `Kayıtlarım` kartinda etiket sunumu sadeletildi:
+  - override yoksa yalniz `Final` etiketi gosteriliyor
+  - override varsa `Orijinal` + `Final` birlikte gosteriliyor
+- Personel triyaj sayfasindaki `Hasta Bilgileri` blogu yeniden tasarlandi:
+  - yeni sorgu satiri (TC + aksiyonlar) daha net hiyerarsiye cekildi
+  - secili hasta karti daha zengin bilgi ozeti ve "Secili Hasta" etiketiyle guncellendi
+  - genel gorunum daha profesyonel ve kullanisli hale getirildi
+- Bu tur kayit sunumu + hasta bilgi blogu guncellemeleri sonrasi frontend build tekrar basariyla dogrulandi (`npm run build --workspace=apps/frontend`)
+- Admin paneli final polish turu uygulandi:
+  - `admin-pro` icin staged section animasyonu eklendi
+  - admin hero alani kartlasmis gradient/surface gorunume alindi
+  - stat/panel kartlarina hover derinlik + border/shadow iyilestirmesi eklendi
+  - admin tablolari `admin-table-wrap` ile scroll/sticky head/zebra satir yapisina alindi
+  - Admin sayfalarindaki kalan inline stiller temizlendi (`admin-textarea`, `admin-inline-note`, table wrappers)
+- Bu admin final polish turu sonrasi frontend build tekrar basariyla dogrulandi (`npm run build --workspace=apps/frontend`)
+- Sidebar altindaki kullanici karti dinamiklestirildi:
+  - login sirasinda `username` localStorage'a yaziliyor
+  - logout sirasinda `username` temizleniyor
+  - eski oturumlar icin JWT `sub` claim'inden fallback ad okunuyor
+  - avatar artik ad/soyad bas harflerinden uretiliyor
+- Dinamik kullanici karti guncellemesi sonrasi frontend build tekrar basariyla dogrulandi (`npm run build --workspace=apps/frontend`)
+- Sidebar kullanici karti bir adim daha gelistirildi:
+  - `/api/auth/me` ile backend'den `adSoyad` okunup gosteriye alindi
+  - rol rozeti eklendi (ADMIN/PERSONEL)
+  - kartta "Son giris" zamani gosterimi eklendi (`lastLoginAt`)
+- Admin `Sistem Loglari` sayfasi backend log endpointine tasindi (`/api/system/logs`)
+  - login/logout + triyaj olusturma/override olaylari listeleniyor
+  - hizli arama alanina secimli filtreler eklendi (islem turu, rol, tarih araligi)
+- Bu tur sonrasi backend testleri ve frontend build tekrar basariyla dogrulandi (`mvn test`, `npm run build --workspace=apps/frontend`)
+- Admin loglarda eski triage kayitlarini da varsayilan listede gostermek icin backend merge mantigi eklendi:
+  - kalici `system_logs` + `triage_records` sentetik olaylari birlikte donuluyor
+  - boylece `Tum Islemler` ve `Triyaj Olusturuldu` filtrelerinde eski kayitlar da gorunur
+- Frontend build tekrar dogrulandi (`npm run build --workspace=apps/frontend`)
+- Operasyon runbook'u dokumante edildi (`memory-bank/deployment/operations-runbook.md`)
+
+## Kesin Kararlar
+- Confidence frontendde `%` gösterilecek
+- STT MVP'de batch; canlı transcript sonraki faz
+- Auth JWT olacak; frontend token döngüsünü yönetecek
+
+## Sonraki Adımlar
+1. Personel tarafında canlı transcript (stream) fazına geçiş planını çıkar (MVP sonrası)
+2. Model entegrasyonu sonrası model-bagli E2E senaryolari ekle
+3. Model-bagli checklist maddelerini final rapora islemek

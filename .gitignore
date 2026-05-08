@@ -1,0 +1,17 @@
+# Node
+node_modules/
+dist/
+
+# Java
+target/
+.mvn/
+
+# IDE/OS
+.idea/
+.vscode/
+.DS_Store
+
+# Env
+.env
+.env.*
+!.env.example

@@ -1,0 +1,10 @@
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+joblib>=1.3
+
+# Optional for berturk_gbdt
+transformers>=4.40
+torch>=2.1
+lightgbm>=4.0
+xgboost>=1.7

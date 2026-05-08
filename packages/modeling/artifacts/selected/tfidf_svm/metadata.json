@@ -1,0 +1,24 @@
+{
+  "model_name": "tfidf_svm",
+  "class_weight": "balanced",
+  "model_params": {
+    "calibration_method": "isotonic",
+    "calibration_cv": 3
+  },
+  "test_size": 0.2,
+  "random_state": 42,
+  "schema": {
+    "age_col": "yas",
+    "gender_col": "cinsiyet",
+    "complaint_col": "sikayet",
+    "target_col": "etiket"
+  },
+  "n_train": 1790,
+  "n_test": 448,
+  "metrics": {
+    "accuracy": 0.7901785714285714,
+    "macro_f1": 0.7878786923344218,
+    "weighted_f1": 0.7893350972337527,
+    "kirmizi_recall": 0.8067226890756303
+  }
+}

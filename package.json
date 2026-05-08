@@ -1,0 +1,13 @@
+{
+  "name": "akilli-triage-system",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": [
+    "apps/frontend",
+    "packages/contracts"
+  ],
+  "scripts": {
+    "dev:frontend": "npm --workspace apps/frontend run dev",
+    "build:frontend": "npm --workspace apps/frontend run build"
+  }
+}

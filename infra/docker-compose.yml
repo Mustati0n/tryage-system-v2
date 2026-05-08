@@ -1,0 +1,16 @@
+version: "3.9"
+services:
+  postgres:
+    image: docker.io/library/postgres:16
+    container_name: akilli-triage-postgres
+    environment:
+      POSTGRES_USER: triage
+      POSTGRES_PASSWORD: triage
+      POSTGRES_DB: triage_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

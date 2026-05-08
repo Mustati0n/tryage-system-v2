@@ -1,0 +1,235 @@
+# Active Context
+
+## Güncel Odak
+- Projenin sıfırdan sistem analiz/tasarım temelini oluşturmak
+- Memory Bank’in zorunlu çekirdek dosyalarını üretmek
+- Ortak veri sözleşmesini (entity/DTO/API) netleştirmek
+
+## Son Değişiklikler
+- `memory-bank/` klasörü oluşturuldu
+- Çekirdek belge seti başlatıldı
+- Ek bağlam olarak tasarım raporu, API sözleşmesi, sequence diagram ve geliştirme akışı dosyaları planlandı
+- `bitirme_api_analiz.docx` parse edilerek endpoint seti doğrulandı
+- Kararlar netleşti: JWT auth, local STT, opsiyonel ses saklama, retention policy, confidence gösterim standardı
+- Monorepo klasörleri açıldı: `apps/backend`, `apps/frontend`, `packages/contracts`, `infra`
+- Backend MVP auth/health iskeleti eklendi
+- Frontend login + role route guard iskeleti eklendi
+- Backend `patients` endpointleri MVP seviyede eklendi
+- Frontend personel ekranına hasta arama/oluşturma akışı eklendi
+- Backend `triage` endpointleri MVP seviyede eklendi (`predict/records/override`, `stt` stub)
+- Frontend personel ekranına tahmin al + kaydet akışı eklendi
+- Backend `users`, `dataset`, `system` endpointleri MVP seviyede eklendi
+- Frontend admin ekranına kayıt listeleme + dataset'e ekleme + export akışı eklendi
+- Backend in-memory servisleri JPA repository yapısına taşındı
+- Flyway V1 migration + seed eklendi
+- Backend derleme (`mvn compile`) ve frontend production build (`npm run build`) doğrulandı
+- Backend integration testleri eklendi (`auth`, `patients`, `triage`, `dataset`) ve `mvn test` başarıyla geçti
+- Auth akışına refresh token persistence eklendi (`/api/auth/refresh`, `refresh_tokens` tablosu, token rotation)
+- Frontend tarafında refresh token interceptor entegrasyonu tamamlandı (401 sonrası otomatik yenileme + retry)
+- STT endpointi local batch entegrasyonuna taşındı (`multipart /api/triage/stt`, `faster-whisper` CLI script, konfigüre edilebilir provider)
+- Infra tarafına container runtime fallback eklendi: `infra/start-db.sh` (docker/podman uyumlu)
+- PostgreSQL 16.x ile Flyway uyumu için backend'e `flyway-database-postgresql` bağımlılığı eklendi
+- Login stabilitesi için backend startup seed eklendi (`DemoUserInitializer`): `admin/admin123`, `personel/personel123` her açılışta garanti ediliyor
+- Patient create akışı upsert davranışına alındı (aynı TC tekrar girilirse hata yerine kayıt güncellenip devam ediliyor)
+- Frontend personel ekranına ses upload + `/api/triage/stt` entegrasyonu eklendi (dosya seç -> metne çevir -> şikayet alanına otomatik doldur)
+- STT local inference ayarı CPU defaulta çekildi (`app.stt.device=cpu`) ve script `--device` parametresi ile çalışacak şekilde güncellendi
+- STT doğruluğu için backend tarafına decoding ayarları eklendi (`model`, `beam-size`, `vad-filter`, `vad-min-silence-ms`, `temperature`)
+- Personel panelinde kayıt durdurunca otomatik STT (opsiyonel checkbox) akışı eklendi
+- Backend tarafında triyaj kaydına `created_by_kullanici_adi` alanı eklendi ve `GET /api/triage/records/me` endpointi açıldı
+- Frontend personel paneline "Kendi Kayıtlarım" listesi ve kayıt bazlı override düzenleme formu eklendi
+- Ortak API sözleşmesi güncellendi (`TriageRecordResponse` alanları + `GET /api/triage/records/me`)
+- Backend integration testleri genişletildi (`records/me` sahiplik/doğruluk testi eklendi) ve `mvn test` tekrar başarılı geçti
+- Personel ekranında override akışı tahmin kartına taşındı (kaydetmeden önce etiket değiştir + neden)
+- Kayıt sırasında orijinal model etiketi (`etiket`) ve kullanıcı override etiketi (`overrideEtiket`) birlikte saklanıyor
+- UX sadeleştirme: post-save override UI kaldırıldı, sistemde tek override noktası kaydetme öncesi tahmin kartı olarak bırakıldı
+- Admin paneline etiket + confidence aralığı + override durumu + tarih aralığı filtreleri eklendi
+- Admin filtreleri server-side moda taşındı (`GET /api/triage/records` query param filtreleri)
+- Personel/Admin UI'da loading/empty/error davranışları güçlendirildi (triyaj ön koşul mesajı, kayıt yükleniyor göstergesi, admin tablo yükleniyor satırı, dataset seçimsiz aksiyon engeli)
+- E2E ana senaryolar backend integration testleri ile genişletildi (pre-save override saklama, admin filtreli kayıt listeleme, dataset item listesi RBAC kontrolü)
+- Admin dataset UX geliştirildi: `GET /api/dataset/items` ile "zaten dataset'te" durumu UI'da proaktif gösteriliyor ve tekrar ekleme engelleniyor
+- Personel form grid yapısı `auto-fit/minmax` ile responsive hale getirildi (mobilde tek kolon, geniş ekranda cok kolon)
+- `infra/smoke-check.sh` eklendi (health + demo login kontrolleri)
+- `memory-bank/testing/e2e-checklist.md` eklendi (model harici kabul test adimlari)
+- Frontend tarafında Playwright browser-level E2E altyapısı eklendi (`apps/frontend/playwright.config.ts`, `apps/frontend/e2e/auth-and-flow.spec.ts`)
+- Playwright testleri başarıyla çalıştı (`personel login->panel`, `admin dataset'e ekle ve tekrar engelle`)
+- Gerçek backend bağlı Playwright akışı eklendi (`apps/frontend/playwright.real.config.ts`, `apps/frontend/e2e-real/real-backend-flow.spec.ts`, `npm run e2e:real`)
+- Negatif E2E senaryolari eklendi (yanlis login, kayit secmeden dataset aksiyonu)
+- Responsive iyilestirmeler genisletildi (login padding + admin filtre/dataset mobil grid)
+- Log retention karari sabitlendi: 30 gun
+- Teslim ozeti dosyasi eklendi (`memory-bank/delivery/final-delivery-report.md`)
+- Backend/API koduna dokunmadan ayrik modelleme paketi olusturuldu (`packages/modeling`)
+- Ortak veri semasi + stratified split + preprocessing akisi eklendi (`data.py`, `preprocessing.py`)
+- Uc model ayni registry ile calisacak sekilde eklendi (`tfidf_logreg`, `tfidf_svm`, `berturk_gbdt`)
+- Egitim/degerlendirme/karsilastirma/tekil inference scriptleri eklendi (`scripts/train.py`, `evaluate.py`, `compare.py`, `predict_one.py`)
+- Model artefact yonetimi eklendi (`model.joblib` + `metadata.json` + tahmin/rapor ciktilari)
+- Model adimlarini tikli takip icin yeni workflow dosyasi eklendi (`memory-bank/modeling/modeling-workflow.md`)
+- Model veri yukleme katmani guncellendi: CSV ayiraci otomatik algilanacak (`;`/`,`), ara satirdaki tekrar header kayitlari otomatik temizlenecek
+- `triage.csv` veri seti ile model karsilastirma gerceklestirildi (2239 satir)
+- Karsilastirma metrikleri: `tfidf_svm` > `tfidf_logreg` > `berturk_gbdt` (KIRMIZI recall odakli secim)
+- Secili model artifact'i sabitlendi (`packages/modeling/artifacts/selected/tfidf_svm`)
+- Backend tahmin katmani refactor edildi: `ModelInferenceService` ile provider bazli tahmin (`python-cli` / `heuristic`)
+- Backend konfige model ayarlari eklendi (`app.model.*`) ve hata durumunda heuristic fallback aktif
+- Backend test profili heuristic provider'a sabitlendi; `mvn test` basarili gecti
+- Backend model tahminine guardrail katmani eklendi (`red/yellow` keyword escalation)
+- Guardrail ayarlari `application.yml` icinde `app.model.guardrail.*` olarak konfige edildi
+- Yeni integration test: guardrail nedeniyle `YESIL -> SARI` escalation senaryosu dogrulandi
+- `README` model konfig bolumune guardrail env ayarlari eklendi
+- Dusuk guvenli YESIL ciktilar icin policy eklendi (`app.model.policy.min-green-confidence`)
+- Model config notu dinamiklestirildi (`SystemService.models` artik model provider/policy bilgisini donuyor)
+- Yeni integration test: low-confidence policy nedeniyle `YESIL -> SARI` gecisi dogrulandi
+- Policy tuning scripti eklendi (`packages/modeling/scripts/tune_policy.py`)
+- `tfidf_svm` predictions uzerinden threshold taramasi yapildi; `unsafe_rate<=0.05` hedefinde onerilen esik `0.65`
+- Backend production default policy threshold `0.65` olarak guncellendi
+- SVM kalibrasyon karsilastirmasi eklendi (`compare_svm_calibration.py`)
+- `sigmoid` ve `isotonic` karsilastirildi; klinik odakli metriklerde `sigmoid` secildi
+- Kalibrasyon secimi `model-selection.json` dosyasina islenerek sabitlendi
+- Genişletilmiş kalibrasyon karsilastirmasi eklendi (`compare_svm_calibration_extended.py`)
+- `sigmoid`, `isotonic` ve `temperature_scaled_sigmoid` ayni akisla karsilastirildi
+- Etiket/probability sirasi hatasi duzeltilerek kalibrasyon metrikleri tutarli hale getirildi
+- Extended karsilastirma sonucu secili artifact `tfidf_svm + isotonic` olarak guncellendi
+- Model selection notu ve modeling README dosyasi yeni kalibrasyon kararina gore guncellendi
+- Model bagimli API smoke scripti eklendi (`infra/model-smoke-check.sh`)
+- Model bagimli kabul checklist dosyasi eklendi (`memory-bank/testing/model-e2e-checklist.md`)
+- Ana README icine model smoke calistirma adimi eklendi
+- Frontend admin paneline kullanici yonetimi bolumu eklendi (`/api/users` listele/ekle, `/api/users/{id}/status` aktif-pasif)
+- Kullanici yonetimi UI degisikliginden sonra frontend build tekrar dogrulandi (`npm run build`)
+- Real-backend Playwright E2E'ye kullanici yonetimi testi eklendi (`admin -> kullanici ekle -> pasif/aktif`)
+- `playwright.real.config.ts --list` ile 4 real-backend senaryosu dogrulandi
+- Real-backend E2E'de model etiketine bagimli kirilgan assertion duzeltildi (`Tahmin: SARI` -> enum regex)
+- `npm run e2e` tekrar kosuldu: 4/4 gecti
+- `npm run e2e:real` tekrar kosuldu: 4/4 gecti
+- `infra/model-smoke-check.sh` icinde JSON parse ve alan adi (`modelVersiyonu`/`not`) uyumsuzluklari duzeltildi
+- `infra/smoke-check.sh` ve `infra/model-smoke-check.sh` birlikte tekrar kosuldu ve basarili gecti
+- Backend regression dogrulamasi icin `mvn test` tekrar kosuldu: 13 test gecti
+- Admin paneline use-case diyagramiyla uyumlu iki bolum eklendi:
+  - `Deneme / Simulasyon Triyaj` (yas/cinsiyet/sikayet ile `/api/triage/predict` deneme tahmini)
+  - `Sistem Loglari / Durum Ozeti` (`/api/system/stats`, `/api/system/models` + son kayitlardan olay ozeti)
+- Admin yenile aksiyonu tek noktadan tum panelleri yeniler hale getirildi (`records + dataset + users + system`)
+- Frontend build dogrulamasi tekrar alindi (`npm run build` basarili)
+- Disaridan gelen frontend zip (`a_tt.zip`) analiz edildi; mevcut projeyle stack/router farklari nedeniyle birebir kopya yerine tasarim dili uyarlanarak entegre edildi
+- Frontend'e global tema/stil katmani eklendi (`apps/frontend/src/styles.css`) ve login/personel/admin sayfalari bu stile baglandi
+- API akislarina dokunmadan UI modernizasyonu tamamlandi; build tekrar basarili (`npm run build`)
+- Frontend shell yapisi eklendi (`apps/frontend/src/components/AppShell.tsx`): role bazli sidebar + topbar + cikis
+- `App.tsx` route yapisi shell ile sarmalandi (login haric tum korumali sayfalar dashboard layout'ta)
+- Personel/Admin sayfalarindaki lokal header/cikis tekrarları kaldirildi; bolumlere anchor id'ler eklendi (`#hasta`, `#triyaj`, `#kayitlar`, `#dataset`, `#kullanicilar`)
+- Shell eklendikten sonra frontend build tekrar dogrulandi (`npm run build`)
+- Triyaj etiketleri icin ortak badge sistemi eklendi (`styles.css`: red/yellow/green/neutral pill)
+- Personel ekraninda tahmin, kaydetme ozeti ve "kendi kayitlarim" alanlarinda etiket badge'leri aktif edildi
+- Admin ekraninda simulasyon sonucu, log ozeti ve kayit tablosunda etiket/override gosterimleri badge formatina alindi
+- Badge iyilestirmeleri sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Kullanici geri bildirimi uzerine admin paneli screenshot referansina yaklastirildi (sadece admin odakli modernizasyon)
+- Admin dashboard yapisi yeniden duzenlendi:
+  - ust ozet kartlari (toplam kayit, bugunku kayit, aktif/toplam personel)
+  - hizli erisim satiri (kayitlar / personel / loglar)
+  - dagilim donut ve haftalik trend bloklari
+  - model izleme + aktif personel mini listesi
+  - tablo ve yonetim alanlari ayni fonksiyonlarla daha profesyonel layoutta tutuldu
+- Global CSS'e admin-pro siniflari ve screenshot'a benzer panel/renk sistemi eklendi
+- Bu admin odakli yeniden duzenleme sonrasi frontend build tekrar basarili (`npm run build`)
+- Yeni karar: admin artik tek uzun sayfa degil, sidebar'dan yonetilen coklu route yapisi
+- Admin route'lari ayrildi:
+  - `/admin/dashboard`
+  - `/admin/records`
+  - `/admin/personnel`
+  - `/admin/logs`
+- Ortak admin API katmani eklendi (`apps/frontend/src/pages/admin/adminApi.ts`) ve sayfalar backend endpointlerine bu katmanla baglandi
+- `App.tsx` ve `AppShell.tsx` route/sidebar yapisi yeni admin sayfalarina gore guncellendi
+- Coklu admin sayfa gecisi sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Kullanilmayan eski admin tek-sayfa dosyasi silindi (`apps/frontend/src/pages/AdminPage.tsx`)
+- Cleanup sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Sidebar UX iyilestirmesi eklendi: menu ikonlari, aktif link glow/transition, hover micro-animasyon
+- Sidebar alt bolume kullanici karti + tek noktadan "Cikis Yap" butonu eklendi (referans ekran hissine yaklastirildi)
+- Topbar'daki tekrarli cikis butonu kaldirildi (layout sade)
+- Bu iyilestirmeler sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Personel tarafi admin ile ayni mimariye tasindi: coklu route + sidebar navigasyon
+  - `/personel/dashboard`
+  - `/personel/patients`
+  - `/personel/triage`
+  - `/personel/records`
+- Yeni personel sayfasi eklendi: `PersonelRecordsPage` (kendi kayitlari listeleme + arama + override duzenleme)
+- Personel API katmani genisletildi: `updateRecordOverride` eklendi (`PATCH /api/triage/records/{id}`)
+- `AppShell` personel linkleri hash'ten route tabanli yapiya gecirildi
+- Personel sayfa ayrimi sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Personel UI referans tasarima daha yakin hale getirildi (ikinci tur):
+  - Dashboard/Patients/Triage/Records sayfalarina hero + quick-link + KPI bloklari eklendi
+  - Records kartlari daha profesyonel meta/badge duzenine tasindi
+  - Triage ses kontrol satiri daha okunur grid yapisina alindi
+  - `styles.css` icine `personel-*` siniflari eklendi
+- Bu personel modernizasyonu sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Yeni geri bildirim turuyle sidebar referans ekranina daha fazla yaklastirildi (logo+baslik+kapatma satiri, aktif ikon renginin kaybolmama davranisi)
+- Personel sayfalarindaki hizli-secim link satirlari kaldirildi
+- Personel triage kart yapisi referans ekran mantigina yeniden duzenlendi (`Hasta Bilgileri` / `Sikayet Bilgileri`, ses kaydi drop alanı)
+- Bu tur duzenlemeler sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Sidebar ikonlari SVG tabanli daha tutarli sete alindi (hasta/triyaj dahil, aktifte ikon kaybolmuyor)
+- Personel `Kayıtlarım` sayfasina profesyonel detay paneli eklendi (`Detayı Gör`):
+  - Hasta bilgileri + sikayet bilgileri + yapay zeka tahmini bolumleri
+  - `Guven Skoru` sadece detay panelinde gosterilecek sekilde tasindi
+  - liste satirlarindaki Ingilizce `Confidence` ifadesi kaldirildi, Turkce terimler kullanildi
+- Bu tur duzenlemeler sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Detay modal deneyimi gelistirildi: `Esc` ile kapanma + sag ust `X` kapatma eklendi
+- Admin dashboard ana sayfadaki yatay hizli kisayol satiri kaldirildi
+- Personel kayit listesinde model bilgisi kaldirildi (model sadece detay panelinde gosteriliyor)
+- Bu tur duzenlemeler sonrasi frontend build tekrar dogrulandi (`npm run build`)
+- Personel `Kayıtlarım` ekranina hizli etiket filtre chipleri eklendi (`Tum Etiketler/KIRMIZI/SARI/YESIL`)
+- Arama kutusu Turkce karakter normalize olacak sekilde guclendirildi (ornek: `sari` ile `SARI`/`sarı` kayitlari)
+- Detay modalindeki `X` kapatma butonu merkez hizaya alinarak gorsel tutarlilik iyilestirildi
+- Personel triage ekranindaki `Sikayet Bilgileri` bolumu bastan tasarlandi:
+  - metin alani + ses girisi daha net ayrildi
+  - ses paneline kayit durumuna gore gorsel feedback eklendi
+  - dosya/mikrofon/STT aksiyonlari tek akista daha kullanisli hale getirildi
+- Bu tur guncellemeler sonrasi frontend build tekrar dogrulandi (`npm run build --workspace=apps/frontend`)
+- Kayıt arama inputunda beyaz ekran olusturan runtime bug fixlendi (`PersonelRecordsPage` filtre callback sirasi)
+- Personel tarafinda draft koruma guclendirildi (TC + triage form + auto-STT sessionStorage)
+- Personel `Hasta Islemleri` akisi sadeletildi (yeni-hasta paneli kaldirildi, secili hasta karti kosullu gosterim)
+- Login sayfasi bastan profesyonel/animasyonlu tasarim diline gecirildi (iki kolonlu kart, atmosferik arkaplan, yumusak animasyonlar)
+- Personel navigation'dan `Hasta Islemleri` route'u kaldirildi, menu sadeletildi
+- Login'de mikro etkileşimler guclendirildi (canli rol ipucu, input focus/hover animasyonu, buton shimmer gecisi)
+- Personel sayfalarina ortak motion/polish katmani eklendi (`personel-pro` sinifi ile staged section animasyonlari ve kart hover derinligi)
+- Personel `Kayıtlarım` listesinde etiket sunumu sadeletildi (override yoksa sadece final; override varsa orijinal+final)
+- Personel triyaj `Hasta Bilgileri` bolumu yeni layout ve profesyonel kart yapisiyla yeniden tasarlandi
+- Admin panelinde final UI polish turu tamamlandi:
+  - `admin-pro` bolumlerinde staged rise animasyon
+  - hero/stat/panel kartlarinda gorsel hiyerarsi ve hover derinligi
+  - admin tablolarda sticky header + zebra satir + ortak wrapper
+  - admin sayfalarinda kalan inline stil kalintilari temizlendi
+- Admin final polish sonrasi frontend build tekrar dogrulandi (`npm run build --workspace=apps/frontend`)
+- Backend'e kalici `system_logs` altyapisi eklendi (`V4` migration + entity/repository/service)
+- Login/Logout ve triyaj create/override aksiyonlari system log'a yazilacak sekilde baglandi
+- `/api/system/logs` endpointi eklendi (q/actionType/role/dateFrom/dateTo/limit filtreleri)
+- `/api/auth/me` yanitina `adSoyad` eklendi; frontend AppShell bu bilgiyle kullanici kartini dolduruyor
+- Sidebar kartina rol rozeti + son giris zamani eklendi; admin log ekrani gercek log endpointine tasindi
+- Bu tur sonrasi backend testleri ve frontend build tekrar basariyla gecti (`mvn test`, `npm run build --workspace=apps/frontend`)
+- Admin Sistem Loglari geriye donuk uyumlulukla guncellendi:
+  - `system_logs` tablosu yeni oldugu icin eski triage kayitlari log ekraninda defaultta gorunmuyordu
+  - `SystemLogService.list` icinde `triage_records` tabanli sentetik `TRIAGE_CREATE` ve `TRIAGE_OVERRIDE` olaylari da birlestirildi
+  - `kayitId` parse + dedup mantigi ile kalici loglarla cakisma engellendi
+- Backend unit test kapsamı genisletildi:
+  - `ModelInferenceServiceUnitTest`
+  - `SystemLogServiceUnitTest`
+  - `mvn test` tekrar yesil calisti
+- Operasyon standardizasyonu tamamlandi:
+  - `memory-bank/deployment/operations-runbook.md` eklendi
+  - README icine runbook referansi eklendi
+- Final teslim raporu guncellendi (`memory-bank/delivery/final-delivery-report.md`)
+
+## Kararlaştırılan Noktalar
+- Topoloji: tek repo
+- Roller: `PERSONEL` ve `ADMIN`
+- UI kapsamı: Login, Personel paneli, Admin paneli
+- Temel domain sınıfları: `Kullanici`, `Hasta`, `TriyajKayit`, `TahminSonucu`, `VeriSetiOgesi`, `LogKaydi`
+- Auth: JWT (`access + refresh`)
+- STT: local Whisper/faster-whisper (MVP batch, canlı transcript sonraki faz)
+- Ses saklama: opsiyonel (ayar ile aç/kapat)
+- Retention: ses 30 gün, log 30 gün, transkript/kayıt manuel silinene kadar
+- Confidence standardı: backend `0..1`, frontend `%`
+- Admin kalite puanı: MVP dışı
+
+## Kritik Açık Konular
+1. Model servis yaklaşımı: backend içinde mi, ayrı inference servisi mi?
+2. KVKK gereği manuel silme yetkileri (rol bazında) nasıl sınırlandırılacak?
+
+## Sonraki Adımlar
+- Guardrail keyword listesini klinik danisman geri bildirimiyle rafine etmek (false positive/false negative analizi)
+- Guardrail + model confidence birlikte calisan policy/threshold versiyonu tasarlamak
+- Isotonic kalibrasyonlu secili artifact icin model-bagli E2E kabul adimlarini sahada calistirip checklisti tiklemek
+- Model-bagli checklist maddelerini test raporuyla birlikte final teslim dosyasina islemek

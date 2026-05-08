@@ -1,0 +1,21 @@
+{
+  "recommended": {
+    "method": "isotonic",
+    "accuracy": 0.765625,
+    "macro_f1": 0.765467455096421,
+    "weighted_f1": 0.7662772323717241,
+    "kirmizi_recall": 0.7899159663865546,
+    "brier_multiclass": 0.3293226625778062,
+    "ece_top1": 0.047493815527681144,
+    "nll": 0.6438328518548815,
+    "temperature": null
+  },
+  "temperature_if_used": 0.7781744985433291,
+  "criteria": [
+    "kirmizi_recall",
+    "macro_f1",
+    "weighted_f1",
+    "ece_top1",
+    "nll"
+  ]
+}

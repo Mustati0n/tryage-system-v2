@@ -1,0 +1,14 @@
+{
+  "max_unsafe_rate_target": 0.05,
+  "recommended_threshold": 0.65,
+  "recommended_metrics": {
+    "threshold": 0.65,
+    "accuracy": 0.7834821428571429,
+    "macro_f1": 0.7878553891620061,
+    "weighted_f1": 0.7869218099300309,
+    "kirmizi_recall": 0.8151260504201681,
+    "unsafe_not_green_as_green": 12,
+    "unsafe_rate": 0.04460966542750929,
+    "escalated_green_count": 43
+  }
+}

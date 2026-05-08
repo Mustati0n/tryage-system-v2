@@ -1,0 +1,115 @@
+@startuml
+title SD-1: Personel Triyaj Kaydi Olusturur ve Tahmin Alir (MVP Batch STT)
+
+actor Personel
+boundary "Personel UI" as UI
+control "TriageController (API)" as C
+control "TriageService" as S
+control "HastaRepository" as HR
+control "TriyajKayitRepository" as TR
+control "TahminRepository" as PR
+control "LogService" as L
+control "Ses->Metin (STT)" as STT
+control "ModelService" as M
+
+Personel -> UI : Triyaj ekranini acar
+UI -> C : HastaSorgula(tcKimlikNo)
+C -> HR : findByTC(tc)
+HR --> C : Hasta? (var/yok)
+
+alt Hasta bulundu
+  C --> UI : Hasta bilgisi
+else Hasta bulunamadi
+  UI -> C : HastaOlustur(...)
+  C -> HR : save(Hasta)
+  HR --> C : hastaId
+  C --> UI : Hasta olusturuldu
+end
+
+alt Sesli sikayet (MVP)
+  UI -> C : POST /api/triage/stt (audioFile)
+  C -> STT : transcribe(audioFile)
+  STT --> C : transcript
+  C --> UI : transcript
+  UI -> C : POST /api/triage/predict
+else Metin sikayet
+  UI -> C : POST /api/triage/predict
+end
+
+C -> S : predictEt(...)
+S -> M : predict(...)
+M --> S : (etiket, guven, modelVersiyon)
+S --> C : TriagePredictResponse
+C --> UI : tahmin sonucu
+
+UI -> C : POST /api/triage/records
+C -> S : kaydet(...)
+S -> TR : save(TriyajKayit, durum=TAHMIN_EDILDI)
+TR --> S : kayitId
+S -> PR : save(TahminSonucu)
+S -> L : logOlustur(TAHMIN_URETILDI)
+S --> C : TriageRecordResponse
+C --> UI : kayit sonucu
+
+opt Override
+  UI -> C : OverrideKaydet(...)
+  C -> TR : updateOverride(...)
+  C -> L : logOlustur(OVERRIDE)
+  C --> UI : Override kaydedildi
+end
+@enduml
+
+@startuml
+title SD-2: Admin Kayitlari Gorur, Dataset'e Etiketler ve Export Alir
+
+actor Admin
+boundary "Admin UI" as UI
+control "AdminController (API)" as C
+control "AdminService" as S
+control "TriyajKayitRepository" as TR
+control "VeriSetiRepository" as DR
+control "LogService" as L
+control "DatasetExportService" as EX
+
+Admin -> UI : Kayitlar ekranini acar
+UI -> C : GET /api/triage/records?filters
+C -> S : kayitlariListele(filters)
+S -> TR : findAllByFilters
+TR --> S : kayit listesi
+S --> C : KayitListeDTO
+C --> UI : kayitlar
+
+Admin -> UI : Kayit sec + gercek etiket
+UI -> C : POST /api/dataset/items
+C -> S : datasetOgesiOlustur(...)
+S -> TR : findById(kayitId)
+TR --> S : kayit?
+
+alt Kayit yok
+  S --> C : 404
+  C --> UI : Kayit bulunamadi
+else Kayit var
+  S -> DR : findByTriageKayitId
+  DR --> S : var/yok
+  alt zaten var
+    S --> C : 409
+    C --> UI : Zaten datasette
+  else ilk kez
+    S -> DR : save(VeriSetiOgesi)
+    S -> L : logOlustur(DATASET_EKLENDI)
+    S --> C : veriId
+    C --> UI : eklendi
+  end
+end
+
+Admin -> UI : Export ister (csv/json)
+UI -> C : GET /api/dataset/export?format=csv
+C -> S : datasetExportHazirla
+S -> DR : findAll
+DR --> S : data
+S -> EX : export
+EX --> S : download token
+S -> L : logOlustur(DATASET_EXPORT)
+S --> C : ExportDTO
+C --> UI : indirme linki
+@enduml

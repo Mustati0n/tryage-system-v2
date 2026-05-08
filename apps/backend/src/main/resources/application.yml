@@ -1,0 +1,51 @@
+server:
+  port: 8080
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/triage_db}
+    username: ${SPRING_DATASOURCE_USERNAME:triage}
+    password: ${SPRING_DATASOURCE_PASSWORD:triage}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+app:
+  seed-demo-users: ${APP_SEED_DEMO_USERS:true}
+  model:
+    provider: ${APP_MODEL_PROVIDER:python-cli}
+    python-binary: ${APP_MODEL_PYTHON_BINARY:../../packages/modeling/.venv/bin/python}
+    script-path: ${APP_MODEL_SCRIPT_PATH:../../packages/modeling/scripts/predict_one.py}
+    artifact-dir: ${APP_MODEL_ARTIFACT_DIR:../../packages/modeling/artifacts/selected/tfidf_svm}
+    fallback-to-heuristic: ${APP_MODEL_FALLBACK_TO_HEURISTIC:true}
+    timeout-seconds: ${APP_MODEL_TIMEOUT_SECONDS:30}
+    guardrail:
+      enabled: ${APP_MODEL_GUARDRAIL_ENABLED:true}
+      red-keywords: ${APP_MODEL_GUARDRAIL_RED_KEYWORDS:nefes darligi,gogus agrisi,bilinc kaybi,bayilma,siddetli kanama,felc}
+      yellow-keywords: ${APP_MODEL_GUARDRAIL_YELLOW_KEYWORDS:ates,karin agrisi,kusma,bas donmesi,cok agri}
+    policy:
+      min-green-confidence: ${APP_MODEL_POLICY_MIN_GREEN_CONFIDENCE:0.65}
+  jwt:
+    secret: ${APP_JWT_SECRET:change-this-secret-key-change-this-secret-key-123456}
+    access-ttl-seconds: 3600
+    refresh-ttl-seconds: 1209600
+  stt:
+    provider: ${APP_STT_PROVIDER:faster-whisper-cli}
+    python-binary: ${APP_STT_PYTHON_BINARY:python3}
+    script-path: ${APP_STT_SCRIPT_PATH:scripts/stt_faster_whisper.py}
+    model: ${APP_STT_MODEL:medium}
+    language: ${APP_STT_LANGUAGE:tr}
+    device: ${APP_STT_DEVICE:cpu}
+    compute-type: ${APP_STT_COMPUTE_TYPE:int8}
+    beam-size: ${APP_STT_BEAM_SIZE:5}
+    vad-filter: ${APP_STT_VAD_FILTER:true}
+    vad-min-silence-ms: ${APP_STT_VAD_MIN_SILENCE_MS:400}
+    temperature: ${APP_STT_TEMPERATURE:0.0}
+    timeout-seconds: ${APP_STT_TIMEOUT_SECONDS:120}

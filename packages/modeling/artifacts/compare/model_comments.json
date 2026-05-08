@@ -1,0 +1,5 @@
+{
+  "tfidf_logreg": "Guclu yan: siniflar arasi denge iyi | Zayif yan: SARI sinifinda F1 daha dusuk | Risk: KIRMIZI recall=0.790",
+  "tfidf_svm": "Guclu yan: KIRMIZI yakalama guclu, siniflar arasi denge iyi | Zayif yan: SARI sinifinda F1 daha dusuk | Risk: KIRMIZI recall=0.815",
+  "berturk_gbdt": "Guclu yan: siniflar arasi denge iyi | Zayif yan: SARI sinifinda F1 daha dusuk | Risk: KIRMIZI recall=0.739"
+}
