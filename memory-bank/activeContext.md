@@ -211,6 +211,14 @@
   - `memory-bank/deployment/operations-runbook.md` eklendi
   - README icine runbook referansi eklendi
 - Final teslim raporu guncellendi (`memory-bank/delivery/final-delivery-report.md`)
+- DB operasyon guvenligi icin backup/restore otomasyonu eklendi:
+  - `infra/db-backup.sh` (manuel + retention)
+  - `infra/db-restore.sh` (sql/sql.gz geri yukleme)
+  - `infra/setup-db-backup-cron.sh` (gunluk otomatik yedek cron kurulumu)
+- Crontab PAM kisitina alternatif olarak user-level systemd timer kurulumu eklendi:
+  - `infra/setup-db-backup-systemd-user.sh`
+  - `systemctl --user` ile gunluk 02:30 backup akisi aktiflenebilir
+- Runbook yedekleme adimlariyla guncellendi (`memory-bank/deployment/operations-runbook.md`)
 
 ## Kararlaştırılan Noktalar
 - Topoloji: tek repo
@@ -233,3 +241,24 @@
 - Guardrail + model confidence birlikte calisan policy/threshold versiyonu tasarlamak
 - Isotonic kalibrasyonlu secili artifact icin model-bagli E2E kabul adimlarini sahada calistirip checklisti tiklemek
 - Model-bagli checklist maddelerini test raporuyla birlikte final teslim dosyasina islemek
+
+## Yeni Model Arastirma Plani (Transformer / BERT / LSTM)
+- Faz-1 (Protokol Dondurma):
+  - Ayni split/seed/metric protokolu sabitlenecek
+  - KIRMIZI recall birincil karar metrigine alinacak
+  - Mevcut `tfidf_svm` referans baseline olarak korunacak
+- Faz-2 (LSTM Deneyi):
+  - Metin tokenizasyon + embedding + sequence modeli ile ilk derin ogrenme deneyi
+  - Class imbalance icin class-weight/focal-loss secenekleri ayni protokolde test edilecek
+- Faz-3 (BERT Deneyi):
+  - BERTurk tabanli siniflandirma (embedding+head veya hafif fine-tune) denenip raporlanacak
+  - KIRMIZI recall ve macro F1 bazli karsilastirma ciktilari alinacak
+- Faz-4 (Transformer Deneyi - BERT disi):
+  - BERT disi transformer adayi (or. XLM-R / ELECTRA ailesi) ayni veri protokolunde denenecek
+  - Hesaplama maliyeti, gecikme ve kararlilik notlari rapora eklenecek
+- Faz-5 (Secim ve Entegrasyon):
+  - Klinik oncelik sirasi ile nihai model secimi:
+    1) KIRMIZI recall
+    2) Macro F1
+    3) Inference maliyeti/operasyon kolayligi
+  - Secilen model mevcut moduler registry/provider yapisina takilacak

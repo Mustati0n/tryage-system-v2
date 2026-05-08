@@ -155,10 +155,19 @@
 - [x] Unit test kapsami genisletildi (`ModelInferenceServiceUnitTest`, `SystemLogServiceUnitTest`)
 - [x] Operasyon runbook dosyasi eklendi (`memory-bank/deployment/operations-runbook.md`)
 - [x] Final teslim raporu guncellendi (model + test + deploy durumu tek dokumanda toplandi)
+- [x] DB backup/restore otomasyonu eklendi (`infra/db-backup.sh`, `infra/db-restore.sh`, `infra/setup-db-backup-cron.sh`)
+- [x] Operasyon runbook'una backup/restore/cron adimlari eklendi
+- [x] Crontab yetki kisitina alternatif `systemd --user` backup timer kurulumu eklendi (`infra/setup-db-backup-systemd-user.sh`)
 
 ## Bekleyen Kısımlar
 - STT canli stream fazi (MVP sonrasi iyilestirme)
 - Merkezi log izleme (ELK/Grafana Loki) entegrasyonu (opsiyonel)
+- Yeni model benchmark fazi (Transformer / BERT / LSTM)
+  - [ ] Faz-1: Deney protokolu dondurulacak (split/seed/metric)
+  - [ ] Faz-2: LSTM deneyi tamamlanacak
+  - [ ] Faz-3: BERT deneyi tamamlanacak
+  - [ ] Faz-4: BERT disi Transformer deneyi tamamlanacak
+  - [ ] Faz-5: Klinik odakli nihai model secimi ve artifact guncellemesi
 
 ## Bilinen Riskler
 - STT canlı akış karmaşıklığı geliştirme süresini uzatabilir

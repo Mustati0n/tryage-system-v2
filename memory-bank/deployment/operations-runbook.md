@@ -143,3 +143,34 @@ docker compose down
 # podman-compose
 podman-compose down
 ```
+
+## 10) Yedekleme / Geri Yukleme
+Tek seferlik manuel yedek:
+```bash
+cd infra
+./db-backup.sh
+```
+
+Yedekten geri yukleme:
+```bash
+cd infra
+./db-restore.sh /abs/path/to/triage_YYYY-MM-DD_HH-MM-SS.sql.gz
+```
+
+Gunluk otomatik yedek (cron):
+```bash
+cd infra
+./setup-db-backup-cron.sh
+```
+
+Crontab erisimi PAM ile kapaliysa (Fedora):
+```bash
+cd infra
+./setup-db-backup-systemd-user.sh
+systemctl --user list-timers | rg akilli-triage-db-backup
+```
+
+Not:
+- Varsayilan yedek yolu: `~/db-backups/akilli-triage`
+- Varsayilan retention: 14 gun
+- Scriptler `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` env degiskenlerini destekler.
