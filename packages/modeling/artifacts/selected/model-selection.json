@@ -1,6 +1,6 @@
 {
-  "selected_model": "lstm_text",
-  "selection_reason": "Temporary switch for physical end-to-end UI/backend validation on LSTM artifact. Previous production candidate was tfidf_svm+isotonic.",
+  "selected_model": "berturk_gbdt",
+  "selection_reason": "Phase-3 BERT experiment artifact activated for physical end-to-end UI/backend validation. Previous test switch was LSTM.",
   "calibration_choice": {
     "method": "isotonic",
     "comparison_file": "packages/modeling/artifacts/selected/tfidf_svm/svm-calibration-comparison.csv",
@@ -10,10 +10,10 @@
     "note": "extended comparison (including temperature scaling) recommended isotonic by clinical-priority sorting"
   },
   "metrics": {
-    "accuracy": 0.6741071428571429,
-    "macro_f1": 0.6784527745795064,
-    "weighted_f1": 0.6788588830954146,
-    "kirmizi_recall": 0.6638655462184874
+    "accuracy": 0.7566964285714286,
+    "macro_f1": 0.7592202318229715,
+    "weighted_f1": 0.7584307102714637,
+    "kirmizi_recall": 0.7394957983193278
   },
   "evaluated_models": ["tfidf_svm", "tfidf_logreg", "berturk_gbdt", "lstm_text"]
 }

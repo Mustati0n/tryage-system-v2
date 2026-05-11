@@ -2,7 +2,7 @@
 set -euo pipefail
 
 API_BASE="${API_BASE:-http://localhost:8080}"
-EXPECTED_MODEL="${EXPECTED_MODEL:-lstm_text-v1}"
+EXPECTED_MODEL="${EXPECTED_MODEL:-berturk_gbdt-v1}"
 
 parse_json_field() {
   local field="$1"

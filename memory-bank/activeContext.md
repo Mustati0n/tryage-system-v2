@@ -236,6 +236,12 @@
   - `packages/modeling/artifacts/selected/lstm_text` artifact'i olusturuldu (phase2 ciktilarindan)
   - backend varsayilan `app.model.artifact-dir` LSTM'e cevrildi
   - `infra/model-smoke-check.sh` beklenen model kontrolu `EXPECTED_MODEL` env ile parametrik hale getirildi (default: `lstm_text-v1`)
+- Faz-3 BERT deneyi tamamlandi:
+  - cikti artifact: `packages/modeling/artifacts/phase3/berturk_gbdt`
+  - metrikler: `accuracy=0.7567`, `macro_f1=0.7592`, `kirmizi_recall=0.7395`
+  - fiziksel test gecisi icin `selected/berturk_gbdt` aktif edildi
+  - backend varsayilan `app.model.artifact-dir` BERT artifact'ine cevrildi
+  - `infra/model-smoke-check.sh` default beklenen model `berturk_gbdt-v1` yapildi
 
 ## Kararlaştırılan Noktalar
 - Topoloji: tek repo

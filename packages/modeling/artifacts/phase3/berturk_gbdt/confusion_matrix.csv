@@ -1,0 +1,4 @@
+,pred_YESIL,pred_SARI,pred_KIRMIZI
+true_YESIL,145,32,2
+true_SARI,34,106,10
+true_KIRMIZI,7,24,88

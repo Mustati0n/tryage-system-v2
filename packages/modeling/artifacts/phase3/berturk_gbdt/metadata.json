@@ -1,0 +1,21 @@
+{
+  "model_name": "berturk_gbdt",
+  "class_weight": "balanced",
+  "model_params": {},
+  "test_size": 0.2,
+  "random_state": 42,
+  "schema": {
+    "age_col": "yas",
+    "gender_col": "cinsiyet",
+    "complaint_col": "sikayet",
+    "target_col": "etiket"
+  },
+  "n_train": 1790,
+  "n_test": 448,
+  "metrics": {
+    "accuracy": 0.7566964285714286,
+    "macro_f1": 0.7592202318229715,
+    "weighted_f1": 0.7584307102714637,
+    "kirmizi_recall": 0.7394957983193278
+  }
+}

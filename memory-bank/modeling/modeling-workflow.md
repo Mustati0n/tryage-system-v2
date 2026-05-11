@@ -68,6 +68,7 @@ Bu dosya sadece modelleme katmani gelistirme adimlarini takip etmek icin tutulur
 - [x] Faz-1 protokol dondurma dokumani olusturuldu (`memory-bank/modeling/phase1-protocol-freeze.md`)
 - [x] Faz-2 LSTM ilk deneyi tamamlandi (`packages/modeling/artifacts/phase2/lstm_text/phase2-lstm-summary.md`)
 - [x] LSTM artifact fiziksel test icin `selected/lstm_text` altina alindi ve backend varsayilani LSTM'e cevrildi
-- [ ] Faz-3 BERT deneyi
+- [x] Faz-3 BERT deneyi tamamlandi (`packages/modeling/artifacts/phase3/berturk_gbdt`)
+- [x] BERT artifact fiziksel test icin `selected/berturk_gbdt` altina alindi ve backend varsayilani BERT'e cevrildi
 - [ ] Faz-4 Transformer deneyi (BERT disi)
 - [ ] Faz-5 Klinik odakli nihai secim ve artifact guncellemesi
