@@ -70,5 +70,10 @@ Bu dosya sadece modelleme katmani gelistirme adimlarini takip etmek icin tutulur
 - [x] LSTM artifact fiziksel test icin `selected/lstm_text` altina alindi ve backend varsayilani LSTM'e cevrildi
 - [x] Faz-3 BERT deneyi tamamlandi (`packages/modeling/artifacts/phase3/berturk_gbdt`)
 - [x] BERT artifact fiziksel test icin `selected/berturk_gbdt` altina alindi ve backend varsayilani BERT'e cevrildi
-- [ ] Faz-4 Transformer deneyi (BERT disi)
-- [ ] Faz-5 Klinik odakli nihai secim ve artifact guncellemesi
+- [x] Faz-4 Transformer deneyi tamamlandi (`packages/modeling/artifacts/phase4/xlmr_gbdt`)
+- [x] Transformer (XLM-R) artifact fiziksel test icin `selected/xlmr_gbdt` altina alindi ve backend varsayilani XLM-R'a cevrildi
+- [x] Faz-5 Klinik odakli nihai secim tamamlandi
+  - Klinik oncelik sirasi: `KIRMIZI recall > macro F1 > operasyonel gecikme`
+  - Nihai secim: `tfidf_svm` (`kirmizi_recall=0.8067`, `macro_f1=0.7879`)
+  - `xlmr_gbdt` fiziksel testte dogru gorunse de metrikte ve gecikmede geride kaldi (`kirmizi_recall=0.7227`)
+  - Backend varsayilani ve secili artifact tekrar `selected/tfidf_svm` olarak sabitlendi

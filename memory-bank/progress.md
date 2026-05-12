@@ -174,6 +174,10 @@
 - [x] LSTM artifact'i `selected` altina alindi ve backend varsayilan modeli fiziksel test icin LSTM'e cevrildi
 - [x] Faz-3 BERT deneyi tamamlandi (`berturk_gbdt`, class_weight=balanced, same split/seed)
 - [x] BERT artifact'i `selected/berturk_gbdt` altina alindi ve backend varsayilan modeli fiziksel test icin BERT'e cevrildi
+- [x] Faz-4 Transformer deneyi tamamlandi (`xlmr_gbdt`, class_weight=balanced, same split/seed)
+- [x] XLM-R artifact'i `selected/xlmr_gbdt` altina alindi ve backend varsayilan modeli fiziksel test icin XLM-R'a cevrildi
+- [x] Faz-5 Klinik odakli nihai model secimi tamamlandi
+- [x] Nihai model `tfidf_svm` olarak tekrar sabitlendi (`selected/tfidf_svm`, backend default geri alindi)
 - [x] Personel `Kayıtlarım` silme akisi eklendi (sil butonu + onay penceresi + backend ownership kontrollu delete endpoint)
 - [x] Personel triage kaydetmede duplicate-kayit korumasi eklendi (ayni kayit varsa kaydetme yerine uyar)
 - [x] Personel triage kaydetme sonrasi net basari geri bildirimi eklendi (kayit no ile)
@@ -185,8 +189,8 @@
   - [x] Faz-1: Deney protokolu donduruldu (split/seed/metric)
   - [x] Faz-2: LSTM deneyi tamamlandi
   - [x] Faz-3: BERT deneyi tamamlandi
-  - [ ] Faz-4: BERT disi Transformer deneyi tamamlanacak
-  - [ ] Faz-5: Klinik odakli nihai model secimi ve artifact guncellemesi
+  - [x] Faz-4: BERT disi Transformer deneyi tamamlandi
+  - [x] Faz-5: Klinik odakli nihai model secimi ve artifact guncellemesi
 
 ## Bilinen Riskler
 - STT canlı akış karmaşıklığı geliştirme süresini uzatabilir

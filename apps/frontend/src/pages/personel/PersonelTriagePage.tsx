@@ -42,6 +42,7 @@ export function PersonelTriagePage() {
   const [sttMessage, setSttMessage] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showPredictModal, setShowPredictModal] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [autoTranscribe, setAutoTranscribe] = useState(() => sessionStorage.getItem(TRIAGE_AUTO_STT_KEY) !== "0");
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
@@ -218,6 +219,7 @@ export function PersonelTriagePage() {
     setTriageError(null);
     setSaveMessage(null);
     setShowSaveModal(false);
+    setShowPredictModal(false);
     setSavedRecord(null);
     if (!selectedPatient) {
       setTriageError("Once bir hasta secmelisin.");
@@ -237,6 +239,7 @@ export function PersonelTriagePage() {
       setPredictResult(data);
       setPreSaveEtiket(data.etiket);
       setPreSaveNeden("");
+      setShowPredictModal(true);
     } catch (err) {
       setTriageError(extractApiError(err, "Tahmin alma sirasinda hata olustu."));
     } finally {
@@ -295,6 +298,7 @@ export function PersonelTriagePage() {
       setSavedRecord(data);
       setPreSaveNeden("");
       setSaveMessage(`Kayit basariyla olusturuldu (Kayit #${data.kayitId}).`);
+      setShowPredictModal(false);
       setShowSaveModal(true);
     } catch (err) {
       setTriageError(extractApiError(err, "Triyaj kaydi kaydedilemedi."));
@@ -632,36 +636,6 @@ export function PersonelTriagePage() {
         </div>
       </section>
 
-      {predictResult ? (
-        <section className="admin-panel-card">
-          <article className="admin-user-card personel-prediction-card">
-            <strong>
-              Tahmin: <span className={triageBadgeClass(predictResult.etiket)}>{predictResult.etiket}</span>
-            </strong>
-            <p className="muted-note">Confidence: {(predictResult.guven * 100).toFixed(1)}% · Model: {predictResult.modelVersiyonu}</p>
-            <div className="admin-filter-grid">
-              <label>
-                Kaydetmeden Once Override
-                <select value={preSaveEtiket || predictResult.etiket} onChange={(e) => setPreSaveEtiket(e.target.value as "KIRMIZI" | "SARI" | "YESIL")}>
-                  <option value="KIRMIZI">KIRMIZI</option>
-                  <option value="SARI">SARI</option>
-                  <option value="YESIL">YESIL</option>
-                </select>
-              </label>
-              <label>
-                Override Nedeni
-                <textarea value={preSaveNeden} onChange={(e) => setPreSaveNeden(e.target.value)} placeholder="Etiketi degistirdiysen zorunlu" />
-              </label>
-            </div>
-            <div className="personel-prediction-actions">
-              <button type="button" className="personel-main-action" onClick={onSave} disabled={!canSave}>
-                {saveLoading ? "Kaydediliyor..." : "Tahmini Kaydet"}
-              </button>
-            </div>
-          </article>
-        </section>
-      ) : null}
-
       {savedRecord ? (
         <section className="admin-panel-card">
           <article className="admin-user-card">
@@ -704,6 +678,54 @@ export function PersonelTriagePage() {
               <div className="admin-filter-actions">
                 <button type="button" onClick={() => setShowSaveModal(false)}>
                   Tamam
+                </button>
+              </div>
+            </article>
+          </div>
+        </div>
+      ) : null}
+
+      {showPredictModal && predictResult ? (
+        <div className="personel-detail-modal-backdrop" onClick={() => setShowPredictModal(false)}>
+          <div className="personel-detail-modal personel-predict-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="personel-detail-top">
+              <div>
+                <h2>Tahmin Sonucu</h2>
+                <p className="muted-note">Kaydetmeden once etiket kontrolu yapabilirsin</p>
+              </div>
+              <button
+                type="button"
+                className="personel-modal-close"
+                onClick={() => setShowPredictModal(false)}
+                aria-label="Tahmin modalini kapat">
+                ×
+              </button>
+            </div>
+            <article className="admin-user-card personel-prediction-card">
+              <strong>
+                Tahmin: <span className={triageBadgeClass(predictResult.etiket)}>{predictResult.etiket}</span>
+              </strong>
+              <p className="muted-note">Guven: {(predictResult.guven * 100).toFixed(1)}% · Model: {predictResult.modelVersiyonu}</p>
+              <div className="admin-filter-grid">
+                <label>
+                  Kaydetmeden Once Override
+                  <select value={preSaveEtiket || predictResult.etiket} onChange={(e) => setPreSaveEtiket(e.target.value as "KIRMIZI" | "SARI" | "YESIL")}>
+                    <option value="KIRMIZI">KIRMIZI</option>
+                    <option value="SARI">SARI</option>
+                    <option value="YESIL">YESIL</option>
+                  </select>
+                </label>
+                <label>
+                  Override Nedeni
+                  <textarea value={preSaveNeden} onChange={(e) => setPreSaveNeden(e.target.value)} placeholder="Etiketi degistirdiysen zorunlu" />
+                </label>
+              </div>
+              <div className="personel-prediction-actions">
+                <button type="button" className="personel-secondary-action" onClick={() => setShowPredictModal(false)}>
+                  Kapat
+                </button>
+                <button type="button" className="personel-main-action" onClick={onSave} disabled={!canSave}>
+                  {saveLoading ? "Kaydediliyor..." : "Tahmini Kaydet"}
                 </button>
               </div>
             </article>

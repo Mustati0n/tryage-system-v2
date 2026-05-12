@@ -1,0 +1,21 @@
+{
+  "model_name": "xlmr_gbdt",
+  "class_weight": "balanced",
+  "model_params": {},
+  "test_size": 0.2,
+  "random_state": 42,
+  "schema": {
+    "age_col": "yas",
+    "gender_col": "cinsiyet",
+    "complaint_col": "sikayet",
+    "target_col": "etiket"
+  },
+  "n_train": 1790,
+  "n_test": 448,
+  "metrics": {
+    "accuracy": 0.71875,
+    "macro_f1": 0.7164458676787445,
+    "weighted_f1": 0.7184883324438119,
+    "kirmizi_recall": 0.7226890756302521
+  }
+}

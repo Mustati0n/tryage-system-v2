@@ -1155,6 +1155,10 @@ body {
   gap: 12px;
 }
 
+.personel-predict-modal {
+  width: min(680px, 100%);
+}
+
 .personel-detail-top {
   display: flex;
   justify-content: space-between;

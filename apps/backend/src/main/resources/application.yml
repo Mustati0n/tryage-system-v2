@@ -23,7 +23,7 @@ app:
     provider: ${APP_MODEL_PROVIDER:python-cli}
     python-binary: ${APP_MODEL_PYTHON_BINARY:../../packages/modeling/.venv/bin/python}
     script-path: ${APP_MODEL_SCRIPT_PATH:../../packages/modeling/scripts/predict_one.py}
-    artifact-dir: ${APP_MODEL_ARTIFACT_DIR:../../packages/modeling/artifacts/selected/berturk_gbdt}
+    artifact-dir: ${APP_MODEL_ARTIFACT_DIR:../../packages/modeling/artifacts/selected/tfidf_svm}
     fallback-to-heuristic: ${APP_MODEL_FALLBACK_TO_HEURISTIC:true}
     timeout-seconds: ${APP_MODEL_TIMEOUT_SECONDS:30}
     guardrail:

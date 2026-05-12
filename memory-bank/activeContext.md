@@ -242,6 +242,13 @@
   - fiziksel test gecisi icin `selected/berturk_gbdt` aktif edildi
   - backend varsayilan `app.model.artifact-dir` BERT artifact'ine cevrildi
   - `infra/model-smoke-check.sh` default beklenen model `berturk_gbdt-v1` yapildi
+- Faz-4 Transformer (BERT disi) deneyi tamamlandi:
+  - aday: `xlmr_gbdt` (`xlm-roberta-base` embedding + GBDT)
+  - cikti artifact: `packages/modeling/artifacts/phase4/xlmr_gbdt`
+  - metrikler: `accuracy=0.7188`, `macro_f1=0.7164`, `kirmizi_recall=0.7227`
+  - fiziksel test gecisi icin `selected/xlmr_gbdt` aktif edildi
+  - backend varsayilan `app.model.artifact-dir` XLM-R artifact'ine cevrildi
+  - `infra/model-smoke-check.sh` default beklenen model `xlmr_gbdt-v1` yapildi
 
 ## Kararlaştırılan Noktalar
 - Topoloji: tek repo
@@ -313,6 +320,13 @@
   - Triyaj kaydetme adiminda duplicate kayit korumasi eklendi
   - Basarili kaydetme sonrasi kayit numarasiyla net geri bildirim mesaji eklendi
 - Personel triage kaydetme geri bildirimi popup/modal akisina tasindi (detay modal stiline uyumlu)
+- Personel triage `Tahmin Al` sonucu popup modal akışına taşındı:
+  - tahmin/override/kaydet tek modal panelde
+  - kaydetme basarili oldugunda tahmin modal kapanip kayit modal aciliyor
+- Faz-5 final model karari tamamlandi:
+  - karsilastirma (`tfidf_svm`, `berturk_gbdt`, `lstm_text`, `xlmr_gbdt`) klinik oncelik sirasiyla yeniden degerlendirildi
+  - nihai secim tekrar `tfidf_svm` olarak sabitlendi
+  - backend varsayilani `selected/tfidf_svm` ve smoke check default `tfidf_svm-v1` olarak geri alindi
 - `Kayıtlarım` silme aksiyonu guclendirildi:
   - Butonlar `type=\"button\"` ile form submit yan etkisinden ayrildi
   - Optimistic UI silme + hata halinde geri alma davranisi eklendi

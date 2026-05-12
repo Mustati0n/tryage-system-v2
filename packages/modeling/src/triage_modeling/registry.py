@@ -9,6 +9,7 @@ from .models import (
     build_lstm_text_pipeline,
     build_tfidf_logreg_pipeline,
     build_tfidf_svm_pipeline,
+    build_xlmr_gbdt_pipeline,
 )
 
 ModelBuilder = Callable[..., Pipeline]
@@ -18,6 +19,7 @@ MODEL_REGISTRY: dict[str, ModelBuilder] = {
     "tfidf_svm": build_tfidf_svm_pipeline,
     "berturk_gbdt": build_berturk_gbdt_pipeline,
     "lstm_text": build_lstm_text_pipeline,
+    "xlmr_gbdt": build_xlmr_gbdt_pipeline,
 }
 
 
